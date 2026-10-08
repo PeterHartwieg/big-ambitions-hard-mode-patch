@@ -212,7 +212,8 @@ namespace HardModePatch
 
     // A method body as runtime-neutral text: opcode names, operands by name, branch targets by
     // instruction index. Types are written by namespace and name, without assembly names, so .NET and
-    // Mono read the same text from the same IL.
+    // Mono read the same text from the same IL. Compiler-generated ordinals are written as #, so only a
+    // change to this body changes its fingerprint (Fingerprint.WithoutGeneratedOrdinals).
     public static class IlText
     {
         public static string Fingerprint(MethodBase method)
@@ -227,7 +228,8 @@ namespace HardModePatch
             for (int index = 0; index < code.Count; index++)
                 foreach (var label in code[index].labels) labels[label] = index;
             var lines = new List<string>(code.Count);
-            foreach (var instruction in code) lines.Add(instruction.opcode.Name + " " + Operand(instruction.operand, labels));
+            foreach (var instruction in code)
+                lines.Add(Core.Fingerprint.WithoutGeneratedOrdinals(instruction.opcode.Name + " " + Operand(instruction.operand, labels)));
             return lines;
         }
 

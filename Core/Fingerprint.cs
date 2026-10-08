@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace HardModePatch.Core
 {
@@ -9,6 +10,17 @@ namespace HardModePatch.Core
     // fingerprint; a new mod version whose body differs is left unpatched instead of patched as Unverified.
     public static class Fingerprint
     {
+        // The numbers the compiler puts in the names of closures, lambdas, cached delegates, iterators,
+        // their fields and local functions count methods in the class, so adding an unrelated method
+        // renumbers them. Covers <>c__DisplayClass71_0, <M>b__299_10, <M>d__24, <>9__299_10, <i>5__2 and
+        // <M>g__Local|12_0.
+        static readonly Regex GeneratedOrdinals = new Regex(@"(__|DisplayClass|\|)\d+(_\d+)?", RegexOptions.CultureInvariant);
+
+        public static string WithoutGeneratedOrdinals(string instruction)
+        {
+            return GeneratedOrdinals.Replace(instruction, "$1#");
+        }
+
         public static string Of(IEnumerable<string> instructions)
         {
             var text = new StringBuilder();

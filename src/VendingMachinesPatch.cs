@@ -37,7 +37,7 @@ namespace HardModePatch
         }
 
         // RivalPlacement.Tick decides when _raised is set; the lock relies on what it means.
-        static readonly Contract TickBody = new Contract("RivalPlacement.Tick", "53e8156f9697eeb9");
+        static readonly Contract TickBody = new Contract("RivalPlacement.Tick", "c0cb4fbaec857754");
 
         public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks)
         {

@@ -34,7 +34,7 @@ namespace HardModePatch
         }
 
         // The station count mirrors CafeServiceQuality.Calculate's pairing of PCs and seats.
-        static readonly Contract QualityBody = new Contract("CafeServiceQuality.Calculate", "006ad42c60015810");
+        static readonly Contract QualityBody = new Contract("CafeServiceQuality.Calculate", "dfc9a44495409b6d");
 
         public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks)
         {

@@ -34,6 +34,7 @@ namespace HardModePatch
         static PropertyInfo casesProperty, caseIdProperty, caseTypeProperty, offeredRateProperty, offeredFeeProperty, offeredTermProperty;
         static PropertyInfo applicationsProperty, suggestedAprProperty, requestedTermProperty, applicationStatusProperty;
         static MethodInfo markMutated;
+        static PropertyInfo initializedProperty;
         // The bank runtime of the loaded save, seen when it binds its data, so a rule switched on mid-game
         // can bring its products within the limits.
         static WeakReference activeRuntime;
@@ -46,17 +47,17 @@ namespace HardModePatch
             new Contract("BigAmbitionsPlayerEconomyGateway.TryChangePlayerMoney", "26fad19818864980"),
             new Contract("EmpireBankRuntime.RequestEmergencyFunding", "60347e82b0345bf8"),
             new Contract("EmpireBankEmergencyCard.OnRequest", "30e9409284aed635"),
-            new Contract("EmpireBankRuntime.UpdateLoanProduct", "1cdef7336e30fa85"),
-            new Contract("EmpireBankRuntime.UpdateProduct", "a71803a7d84d214f"),
-            new Contract("EmpireBankRuntime.AdjustProductRate", "70f3e8fe5d6e01ff"),
-            new Contract("EmpireBankRuntime.ApplySaveData", "9ea06d2914b5680f"),
-            new Contract("EmpireBankRuntime.ApproveApplication", "8b46c064b4e2bdc7"),
-            new Contract("EmpireBankRuntime.ApproveCreditCardApplication", "995464bbd0c4c1ab"),
-            new Contract("EmpireBankRuntime.SubmitNegotiationOffer", "5f82642f18e37814"),
-            new Contract("EmpireBankRuntime.FinalizeAcceptedNegotiation", "4795d1b8cbc6b0ed"),
-            new Contract("EmpireTelemetryClient.FetchStats", "6ffe5a58db6da38d"),
-            new Contract("EmpireTelemetryClient.FetchStats iterator", "3236359ec1ba54db"),
-            new Contract("EmpireBankSupportersView.StartRemoteRefresh", "cc8fa94d98551ae0")
+            new Contract("EmpireBankRuntime.UpdateLoanProduct", "5639a0f5646999a7"),
+            new Contract("EmpireBankRuntime.UpdateProduct", "f55960e19e8395d4"),
+            new Contract("EmpireBankRuntime.AdjustProductRate", "a3702dec711141e9"),
+            new Contract("EmpireBankRuntime.ApplySaveData", "08b01919405ac20e"),
+            new Contract("EmpireBankRuntime.ApproveApplication", "37f4bc1840295652"),
+            new Contract("EmpireBankRuntime.ApproveCreditCardApplication", "e5633d6e4f023223"),
+            new Contract("EmpireBankRuntime.SubmitNegotiationOffer", "a1fd52e597dfd1d8"),
+            new Contract("EmpireBankRuntime.FinalizeAcceptedNegotiation", "9c3f1589adc0347c"),
+            new Contract("EmpireTelemetryClient.FetchStats", "a7f75bfb07728f61"),
+            new Contract("EmpireTelemetryClient.FetchStats iterator", "bb353dfbb5307335"),
+            new Contract("EmpireBankSupportersView.StartRemoteRefresh", "0465452d6e792ccb")
         };
 
         public TargetInfo Target { get { return Targets.EmpireBank; } }
@@ -199,12 +200,14 @@ namespace HardModePatch
             requestedTermProperty = AccessTools.Property(application, "RequestedTermMonths");
             applicationStatusProperty = AccessTools.Property(application, "Status");
             markMutated = AccessTools.DeclaredMethod(runtime, "MarkStateMutated", new[] { typeof(string) });
+            initializedProperty = AccessTools.Property(runtime, "IsInitialized");
             return ListOf(productsProperty, product) && Readable(productIdProperty, typeof(string))
                 && productTypeProperty != null && Readable(productTypeProperty, productTypeProperty.PropertyType) && HasEnumValues(productTypeProperty.PropertyType, "Loan", "CreditCard")
                 && Writable(rateProperty, typeof(decimal)) && Writable(feeProperty, typeof(decimal)) && Writable(termProperty, typeof(int))
                 && ListOf(applicationsProperty, application) && Writable(suggestedAprProperty, typeof(decimal)) && Writable(requestedTermProperty, typeof(int))
                 && applicationStatusProperty != null && Readable(applicationStatusProperty, applicationStatusProperty.PropertyType) && HasEnumValues(applicationStatusProperty.PropertyType, "Pending")
-                && markMutated != null && markMutated.ReturnType == typeof(void) && !markMutated.IsStatic;
+                && markMutated != null && markMutated.ReturnType == typeof(void) && !markMutated.IsStatic
+                && Readable(initializedProperty, typeof(bool));
         }
 
         static bool ReadNegotiationMembers(Type runtime, Type negotiation)
@@ -249,7 +252,8 @@ namespace HardModePatch
             try
             {
                 var runtime = activeRuntime == null ? null : activeRuntime.Target;
-                if (runtime == null) return;
+                // Back at the main menu the runtime still holds the last save's products but no bank.
+                if (runtime == null || !(bool)initializedProperty.GetValue(runtime, null)) return;
                 if (Normalize(runtime) > 0) markMutated.Invoke(runtime, new object[] { "HardModePatchLimits" });
             }
             catch (Exception ex) { Log.Error("Empire Bank: products not brought within the limits: " + ex); }

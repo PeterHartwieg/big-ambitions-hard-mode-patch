@@ -2,7 +2,7 @@
 
 A Big Ambitions mod that rebalances other Workshop mods so they fit a hard game. It changes nothing on its own. When one of the mods below is installed, it patches that mod while the game runs, and every change can be switched off under Settings > Mods.
 
-**Status:** version 0.1.0, built against game build 3682. All six patches are written, and an offline check resolves and applies every hook against the reviewed versions of the six mods. Two review rounds with three reviewers are done and their findings fixed. Nothing has been run in the game yet.
+**Status:** version 0.1.0, built against game build 3682. All six patches are written, and an offline check resolves and applies every hook against the reviewed versions of the six mods. Three review rounds with three reviewers are done; all three cleared it for in-game testing. Nothing has been run in the game yet.
 
 ## What it changes
 
