@@ -25,7 +25,11 @@ namespace HardModePatch
             try
             {
                 Options.Load(context.ModId);
-                patcher = new Patcher(new Harmony(HarmonyId), new ITargetPatch[] { new HardcoreAmbitionsPatch() });
+                patcher = new Patcher(new Harmony(HarmonyId), new ITargetPatch[]
+                {
+                    new HardcoreAmbitionsPatch(), new MeaningfulAmbiencePatch(), new BakeryPatch(),
+                    new InternetCafePatch(), new VendingMachinesPatch(), new EmpireBankPatch()
+                });
                 patcher.Start();
                 Options.Register(context.ModId, patcher);
                 Log.Info("Version " + Version + " active, Harmony " + typeof(Harmony).Assembly.GetName().Version + ". Mods not loaded yet are patched when they load.");

@@ -2,7 +2,7 @@
 
 A Big Ambitions mod that rebalances other Workshop mods so they fit a hard game. It changes nothing on its own. When one of the mods below is installed, it patches that mod while the game runs, and every change can be switched off under Settings > Mods.
 
-**Status:** version 0.1.0, built against game build 3682. It has not been run in the game yet. Only the Hardcore Ambitions patch exists so far; the rest are planned in [docs/plan.md](docs/plan.md).
+**Status:** version 0.1.0, built against game build 3682. All six patches are written, and an offline check resolves and applies every hook against the reviewed versions of the six mods. Nothing has been run in the game yet.
 
 ## What it changes
 
@@ -10,9 +10,16 @@ A Big Ambitions mod that rebalances other Workshop mods so they fit a hard game.
 | --- | --- | --- |
 | [Hardcore Ambitions](https://steamcommunity.com/sharedfiles/filedetails/?id=3809287926) | You still start with $551 and the $75,454 student loan, but the game keeps the difficulty settings you chose instead of the mod's 23 preset values. | Keep my difficulty settings |
 | | No starting investment funds. | Start without the investment funds |
-| | The mod's higher vehicle and boat prices stay in Hardcore saves and are put back to normal when you load any other save in the same session. | Hardcore vehicle prices only in Hardcore saves |
-
-Planned next: Meaningful Ambience, Internet Cafe, Bakery, Vending Machines and Empire Bank.
+| | The mod's higher vehicle and boat prices stay in Hardcore saves and go back to normal when you load any other save in the same session. | Hardcore vehicle prices only in Hardcore saves |
+| [Meaningful Ambience](https://steamcommunity.com/sharedfiles/filedetails/?id=3810641423) | Decor adds a share of the customers the game sends (up to the preset, for example 10%), instead of a share of the building's capacity every open hour. Low customer promotion, marketing and quiet hours now carry through. | Decor adds a share of the customers the game sends |
+| [Bakery](https://steamcommunity.com/sharedfiles/filedetails/?id=3810927743) | Prices at vanilla bakery margins: bread $3.00 wholesale / $7.50 market, bun $2.00 / $5.00, chocolate cookie $1.50 / $3.80, latte $1.10 / $4.50, americano $0.90 / $3.90. Businesses that already set their own selling prices keep them. | Vanilla bakery margins (needs a restart) |
+| [Internet Cafe](https://steamcommunity.com/sharedfiles/filedetails/?id=3796860957) | While you're away, a cafe serves at most two customers per usable PC per hour, matching its 30-minute sessions. | At most two customers per PC per hour |
+| [Vending Machines](https://steamcommunity.com/sharedfiles/filedetails/?id=3812054455) | While you place a machine in a rival's building, only vending items can be picked up. The rival's furniture stays locked. | Rival furniture stays locked while placing a machine |
+| [Empire Bank](https://steamcommunity.com/sharedfiles/filedetails/?id=3781110629) | Interest withdrawals are taxed at your save's tax rate when you take them out. | Tax withdrawals |
+| | The emergency central bank button does nothing. | No emergency central bank borrowing |
+| | Applicants keep the credit score they were given; a product's minimum no longer raises everyone to it. | Honest credit scores |
+| | Loan APR at most 15%, origination fee at most 3%, loan term at least 6 months, card APR at most 30%. | Product limits |
+| | No requests to the author's statistics and supporters servers. The opt-in heartbeat in Empire Bank's own settings is unchanged. | No requests to the author's servers |
 
 The student loan keeps Hardcore Ambitions' own terms: $16 interest and a $158 payment a day.
 
@@ -42,7 +49,10 @@ Needs the .NET SDK (8 or newer) and the game's managed DLLs, which belong to Hov
 tools/fetch-game-dlls.sh <ssh host of the Windows game PC>
 tools/build.sh
 dotnet test tests/HardModePatch.Core.Tests.csproj
+tools/check-hooks.sh <folder holding the target mods' DLLs>
 ```
+
+`tools/check-hooks.sh` loads the built patch, the game's assemblies and the target mods' DLLs in .NET, resolves every hook and applies every patch with Harmony, then removes them. It catches renamed methods, changed signatures and mismatched patch parameters without starting the game. It needs the Unity modules in `build/game-dlls` as well; copy every `Unity*.dll` from the game's `Managed` folder there.
 
 `tools/build.sh` compiles with the SDK's C# compiler against the game's own `mscorlib`, so the package runs on the game's Mono runtime. Harmony 2.4.2 is downloaded and checked against a pinned hash.
 

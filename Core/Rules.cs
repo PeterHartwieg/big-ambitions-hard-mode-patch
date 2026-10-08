@@ -30,6 +30,33 @@ namespace HardModePatch.Core
         public static readonly Rule HardcoreNoFunds = new Rule("hardcore_no_funds", Targets.HardcoreAmbitions, true);
         public static readonly Rule HardcoreVehiclePricesPerSave = new Rule("hardcore_vehicle_prices_per_save", Targets.HardcoreAmbitions, true);
 
-        public static readonly IList<Rule> All = new[] { HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave };
+        // Meaningful Ambience: decor scales the customers the game sends instead of adding a share of capacity.
+        public static readonly Rule AmbienceScalesWithDemand = new Rule("ambience_scales_with_demand", Targets.MeaningfulAmbience, true);
+
+        // Bakery: vanilla bakery margins. Prices are read when the items register, so a change needs a restart.
+        public static readonly Rule BakeryVanillaMargins = new Rule("bakery_vanilla_margins", Targets.Bakery, true);
+
+        // Internet Cafe: off-screen customers limited by the PCs, two 30-minute sessions per PC per hour.
+        public static readonly Rule CafePcCapacity = new Rule("cafe_pc_capacity", Targets.InternetCafe, true);
+
+        // Vending Machines: holding a machine in a rival's building doesn't open their furniture to you.
+        public static readonly Rule VendingProtectRivalFurniture = new Rule("vending_protect_rival_furniture", Targets.VendingMachines, true);
+
+        // Empire Bank.
+        public static readonly Rule BankTaxWithdrawals = new Rule("bank_tax_withdrawals", Targets.EmpireBank, true);
+        public static readonly Rule BankNoEmergencyBorrowing = new Rule("bank_no_emergency_borrowing", Targets.EmpireBank, true);
+        public static readonly Rule BankHonestCreditScores = new Rule("bank_honest_credit_scores", Targets.EmpireBank, true);
+        public static readonly Rule BankProductLimits = new Rule("bank_product_limits", Targets.EmpireBank, true);
+        public static readonly Rule BankNoRemoteRequests = new Rule("bank_no_remote_requests", Targets.EmpireBank, true);
+
+        public static readonly IList<Rule> All = new[]
+        {
+            HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave,
+            AmbienceScalesWithDemand,
+            BakeryVanillaMargins,
+            CafePcCapacity,
+            VendingProtectRivalFurniture,
+            BankTaxWithdrawals, BankNoEmergencyBorrowing, BankHonestCreditScores, BankProductLimits, BankNoRemoteRequests
+        };
     }
 }

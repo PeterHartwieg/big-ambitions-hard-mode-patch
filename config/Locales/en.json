@@ -7,5 +7,20 @@
   "hardmode_state_verified": "Patched (reviewed version)",
   "hardmode_state_unverified": "Patched (new version, not yet reviewed)",
   "hardmode_state_incompatible": "Not patched: this version changed the methods the patch needs",
-  "hardmode_state_missing": "Not installed or not loaded"
+  "hardmode_state_missing": "Not installed or not loaded",
+  "hardmode_target_ambience": "Meaningful Ambience",
+  "hardmode_ambience_scales_with_demand": "Decor adds a share of the customers the game sends",
+  "hardmode_target_bakery": "Bakery",
+  "hardmode_bakery_vanilla_margins": "Vanilla bakery margins (applies after a restart)",
+  "hardmode_target_cafe": "Internet Cafe",
+  "hardmode_cafe_pc_capacity": "At most two customers per PC per hour",
+  "hardmode_target_vending": "Vending Machines",
+  "hardmode_vending_protect_rival_furniture": "Rival furniture stays locked while placing a machine",
+  "hardmode_target_bank": "Empire Bank",
+  "hardmode_bank_tax_withdrawals": "Tax withdrawals at the save's tax rate",
+  "hardmode_bank_no_emergency_borrowing": "No emergency central bank borrowing",
+  "hardmode_bank_honest_credit_scores": "A minimum credit score doesn't raise applicants' scores",
+  "hardmode_bank_product_limits": "Cap loan APR at 15%, fees at 3%, card APR at 30%; loans of 6 months or more",
+  "hardmode_bank_no_remote_requests": "No requests to the author's servers",
+  "hardmode_bank_emergency_blocked": "Emergency borrowing is off (Hard Mode Patch)"
 }

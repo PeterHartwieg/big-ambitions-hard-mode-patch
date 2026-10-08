@@ -1,0 +1,64 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using BigAmbitions.Items;
+using HardModePatch.Core;
+using HarmonyLib;
+
+namespace HardModePatch
+{
+    // Bakery (3810927743) registers five products whose margins are five to ten times vanilla food. Their
+    // wholesale and default market prices are rewritten as the items register, and once more for items
+    // already registered when this patch arrived. Rival bakeries price from the same items. A business
+    // that already set its own selling prices keeps them.
+    public sealed class BakeryPatch : ITargetPatch
+    {
+        static FieldInfo marketPriceField;
+        static FieldInfo itemsField;
+
+        public TargetInfo Target { get { return Targets.Bakery; } }
+
+        public IList<MethodBase> ResolveHooks(Assembly target)
+        {
+            var bakery = target.GetType("Bakery", false);
+            marketPriceField = AccessTools.Field(typeof(Item), "defaultMarketPrice");
+            itemsField = AccessTools.Field(typeof(ItemsGetter), "ItemsDictionary");
+            MethodBase register = marketPriceField != null && marketPriceField.FieldType == typeof(float) && itemsField != null
+                ? AccessTools.Method(typeof(ItemsGetter), "RegisterModItem", new[] { typeof(Item) })
+                : null;
+            MethodBase bakeryLoad = bakery == null ? null : AccessTools.Method(bakery, "OnLoadAsync");
+            return new[] { register, bakeryLoad };
+        }
+
+        public void Apply(Harmony harmony, Assembly target, IList<MethodBase> hooks)
+        {
+            harmony.Patch(hooks[0], prefix: new HarmonyMethod(typeof(BakeryPatch), "RegisterPrefix"));
+            if (!Rules.BakeryVanillaMargins.Enabled) return;
+            var items = itemsField.GetValue(null) as Dictionary<string, Item>;
+            if (items == null) return;
+            foreach (var price in BakeryPrices.All)
+            {
+                Item item;
+                if (items.TryGetValue(price.ItemName, out item) && item != null) Reprice(item, price);
+            }
+        }
+
+        static void RegisterPrefix(Item item)
+        {
+            try
+            {
+                if (!Rules.BakeryVanillaMargins.Enabled || item == null) return;
+                var price = BakeryPrices.For(item.itemName);
+                if (price != null) Reprice(item, price);
+            }
+            catch (Exception ex) { Log.Error("Bakery: price left as published: " + ex); }
+        }
+
+        static void Reprice(Item item, BakeryPrice price)
+        {
+            item.wholesalePrice = price.Wholesale;
+            marketPriceField.SetValue(item, price.Market);
+            Log.Info("Bakery: " + price.ItemName + " now " + price.Wholesale.ToString("0.00") + " wholesale, " + price.Market.ToString("0.00") + " market.");
+        }
+    }
+}
