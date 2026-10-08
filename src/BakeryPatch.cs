@@ -15,6 +15,8 @@ namespace HardModePatch
     {
         static FieldInfo marketPriceField;
         static FieldInfo itemsField;
+        // Prices as the mod shipped them, per item asset this patch changed, for an unload mid-game.
+        static readonly Dictionary<Item, KeyValuePair<float, float>> originals = new Dictionary<Item, KeyValuePair<float, float>>();
 
         public TargetInfo Target { get { return Targets.Bakery; } }
 
@@ -28,6 +30,20 @@ namespace HardModePatch
                 : null;
             MethodBase bakeryLoad = bakery == null ? null : AccessTools.Method(bakery, "OnLoadAsync");
             return new[] { register, bakeryLoad };
+        }
+
+        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks) { return new ContractCheck[0]; }
+
+        public void Revert()
+        {
+            foreach (var pair in originals)
+            {
+                if (pair.Key == null) continue;
+                pair.Key.wholesalePrice = pair.Value.Key;
+                marketPriceField.SetValue(pair.Key, pair.Value.Value);
+            }
+            if (originals.Count > 0) Log.Info("Bakery: restored the published prices of " + originals.Count + " items.");
+            originals.Clear();
         }
 
         public void Apply(Harmony harmony, Assembly target, IList<MethodBase> hooks)
@@ -56,6 +72,7 @@ namespace HardModePatch
 
         static void Reprice(Item item, BakeryPrice price)
         {
+            if (!originals.ContainsKey(item)) originals[item] = new KeyValuePair<float, float>(item.wholesalePrice, (float)marketPriceField.GetValue(item));
             item.wholesalePrice = price.Wholesale;
             marketPriceField.SetValue(item, price.Market);
             Log.Info("Bakery: " + price.ItemName + " now " + price.Wholesale.ToString("0.00") + " wholesale, " + price.Market.ToString("0.00") + " market.");

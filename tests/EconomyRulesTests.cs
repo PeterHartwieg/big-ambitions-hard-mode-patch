@@ -65,3 +65,47 @@ public class EconomyRulesTests
         Assert.Equal(612, BankRules.ApplicantScore(850, 612));
     }
 }
+
+public class EconomyRulesRoundOneTests
+{
+    [Fact]
+    public void StationsPairPcsWithSeatsUnderTheSameRoot()
+    {
+        // Two PCs and one chair on desk A, one PC and two chairs on desk B, a PC on desk C with no chair.
+        var pcs = new[] { "A", "A", "B", "C" };
+        var seats = new[] { "A", "B", "B" };
+        Assert.Equal(2, CafeMath.UsableStations(pcs, seats));
+    }
+
+    [Fact]
+    public void UnresolvedRootsCountForNothing()
+    {
+        Assert.Equal(0, CafeMath.UsableStations(new string?[] { null }!, new string?[] { null }!));
+    }
+
+    [Theory]
+    [InlineData(0.15, 0.005, 0)]
+    [InlineData(0.14, 0.005, 0.005)]
+    [InlineData(0.148, 0.005, 0.002)]
+    [InlineData(0.20, 0.005, 0)]
+    [InlineData(0.15, -0.005, -0.005)]
+    public void LoanRateNudgesStopAtTheCap(double current, double delta, double expected)
+    {
+        Assert.Equal((decimal)expected, BankRules.ClampDelta(isLoan: true, isCard: false, (decimal)current, (decimal)delta));
+    }
+
+    [Fact]
+    public void DepositRateNudgesAreUntouched()
+    {
+        Assert.Equal(0.01m, BankRules.ClampDelta(isLoan: false, isCard: false, 0.45m, 0.01m));
+    }
+
+    [Fact]
+    public void FeesAndTermsAreClampedToTheLimits()
+    {
+        Assert.Equal(0.03m, BankRules.ClampFee(0.10m));
+        Assert.Equal(0.02m, BankRules.ClampFee(0.02m));
+        Assert.Equal(6, BankRules.ClampTerm(1));
+        Assert.Equal(24, BankRules.ClampTerm(24));
+    }
+}

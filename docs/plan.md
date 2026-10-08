@@ -49,8 +49,8 @@ Margins per unit close to the vanilla bakery and coffee items (croissant $4.29, 
 ## Order
 
 1. Scaffold: entry class, target gate, options page, build and install scripts, tests for the pure logic. Done 8 October 2026.
-2. Patches in order of risk to the series: Hardcore Ambitions, Meaningful Ambience, Internet Cafe, Bakery, Vending Machines, Empire Bank. All written 8 October 2026; `tools/check-hooks.sh` resolves and applies all 20 hooks against the reviewed DLLs. Not yet run in the game.
-3. Review loop with three reviewers until they agree, as for the food truck mod.
+2. Patches in order of risk to the series: Hardcore Ambitions, Meaningful Ambience, Internet Cafe, Bakery, Vending Machines, Empire Bank. All written 8 October 2026; `tools/check-hooks.sh` resolves and applies every hook and checks every body fingerprint against the reviewed DLLs. Not yet run in the game.
+3. Review loop with three reviewers until they agree, as for the food truck mod. Round 1 (8 October 2026): all three said fix first; their findings are fixed in the commit after `03786f2`.
 4. Build on homepc, install, and run the test save (HART repository, `docs/research/modpack-compatibility-2026-10-07.md`, "Test save before Episode 1") with the patch: Hardcore start (loan, $551, no funds, custom values intact in the save), an unstaffed one-PC cafe, a decorated shop's ambience ledger, Bakery prices in the wholesale app, a rival-building vending placement, and a second save loaded in the same session showing vanilla car prices.
 5. Message each target mod's author before publishing: what the patch changes and why, and which changes they could make themselves (Empire Bank's consent gate, a Bakery price option, Ambience scaling with demand). Each upstream fix retires a patch. Check the Workshop's and Hovgaard's rules on mods that patch other mods.
 6. Publish on the Workshop next to Rival Balance.

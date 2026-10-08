@@ -14,12 +14,20 @@ namespace HardModePatch
     {
         const string BridgeType = "MeaningfulAmbience.GameBridge";
         const string ProjectionType = "MeaningfulAmbience.CustomerProjection";
-        static readonly string[] Fields =
+        // Every projection field the postfix reads or writes, with the type it must have.
+        static readonly KeyValuePair<string, Type>[] Fields =
         {
-            "Supported", "IsOffice", "IsOpen", "GameGeneratesCustomers", "NothingBought", "VanillaRaw", "VanillaTarget",
-            "EffectiveCapacity", "AmbienceRaw", "CombinedRaw", "FinalTarget", "TheoreticalAddedWithoutCapacity",
-            "AddedAfterCapacity", "BlockedByCapacity", "TotalBlockedByCapacity"
+            Field<bool>("Supported"), Field<bool>("IsOffice"), Field<bool>("IsOpen"), Field<bool>("GameGeneratesCustomers"),
+            Field<bool>("NothingBought"), Field<double>("VanillaRaw"), Field<int>("VanillaTarget"), Field<int>("EffectiveCapacity"),
+            Field<double>("AmbienceRaw"), Field<double>("CombinedRaw"), Field<int>("FinalTarget"),
+            Field<int>("TheoreticalAddedWithoutCapacity"), Field<int>("AddedAfterCapacity"), Field<int>("BlockedByCapacity"),
+            Field<int>("TotalBlockedByCapacity")
         };
+        // ProjectRetail's reviewed body (mod hash 5564717279c75596): the postfix redoes its last steps, so
+        // a change to its arithmetic must leave the mod unpatched.
+        static readonly Contract ProjectBody = new Contract("GameBridge.ProjectRetail", "ca0915815150d570");
+
+        static KeyValuePair<string, Type> Field<T>(string name) { return new KeyValuePair<string, Type>(name, typeof(T)); }
         static readonly Dictionary<string, FieldInfo> fields = new Dictionary<string, FieldInfo>();
 
         public TargetInfo Target { get { return Targets.MeaningfulAmbience; } }
@@ -40,14 +48,22 @@ namespace HardModePatch
         static bool ReadFields(Type projection)
         {
             fields.Clear();
-            foreach (var name in Fields)
+            if (projection.IsValueType) return false;   // the postfix writes into the returned object
+            foreach (var wanted in Fields)
             {
-                var field = AccessTools.Field(projection, name);
-                if (field == null) return false;
-                fields[name] = field;
+                var field = AccessTools.Field(projection, wanted.Key);
+                if (field == null || field.IsStatic || field.IsInitOnly || field.IsLiteral || field.FieldType != wanted.Value) return false;
+                fields[wanted.Key] = field;
             }
             return true;
         }
+
+        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks)
+        {
+            return new[] { new ContractCheck(hooks[0], ProjectBody) };
+        }
+
+        public void Revert() { }
 
         public void Apply(Harmony harmony, Assembly target, IList<MethodBase> hooks)
         {

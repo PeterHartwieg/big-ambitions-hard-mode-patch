@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Reflection;
 using HardModePatch.Core;
 using HarmonyLib;
+using UI.InteriorDesigner;
 
 namespace HardModePatch
 {
     // Vending Machines (3812054455) turns on the game's developer flag BuildingManager
     // .isBuildingTemporarilyEditable while the player holds a machine in a rival's building, so the machine
-    // can be placed there. The same flag lets the player pick up and move any item in that building. While
-    // the mod has the flag up (RivalPlacement._raised), only its own items can be picked up.
+    // can be placed there. The same flag lets the player pick up and move any item in that building, and
+    // offers "change text" on a rival's sign, which opens the Interior Designer with its move and sell
+    // tools. While the mod has the flag up (RivalPlacement._raised) in a rival's building, only its own
+    // items can be picked up and the Interior Designer doesn't open.
     public sealed class VendingMachinesPatch : ITargetPatch
     {
         const string OwnItemPrefix = "vendingmachines:";
@@ -25,14 +28,27 @@ namespace HardModePatch
             return new MethodBase[]
             {
                 ready ? AccessTools.Method(typeof(ItemController), "SecondaryInteract", Type.EmptyTypes) : null,
-                ready ? AccessTools.Method(typeof(ItemController), "TryToGrabItem", Type.EmptyTypes) : null
+                ready ? AccessTools.Method(typeof(ItemController), "TryToGrabItem", Type.EmptyTypes) : null,
+                ready ? AccessTools.DeclaredMethod(typeof(InteriorDesignerUI), "Show", Type.EmptyTypes) : null
             };
         }
+
+        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks) { return new ContractCheck[0]; }
+
+        public void Revert() { }
 
         public void Apply(Harmony harmony, Assembly target, IList<MethodBase> hooks)
         {
             harmony.Patch(hooks[0], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "InteractPrefix"));
             harmony.Patch(hooks[1], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "GrabPrefix"));
+            harmony.Patch(hooks[2], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "DesignerPrefix"));
+        }
+
+        static bool DesignerPrefix()
+        {
+            if (!InRivalPlacement()) return true;
+            Log.Info("Vending Machines: the Interior Designer stays closed while placing a machine in a rival's building.");
+            return false;
         }
 
         static bool InteractPrefix(ItemController __instance)
@@ -49,15 +65,20 @@ namespace HardModePatch
 
         static bool Locked(ItemController item)
         {
+            if (item == null || !InRivalPlacement()) return false;
+            return item.itemName == null || !item.itemName.StartsWith(OwnItemPrefix, StringComparison.Ordinal);
+        }
+
+        static bool InRivalPlacement()
+        {
             try
             {
-                if (!Rules.VendingProtectRivalFurniture.Enabled || item == null) return false;
+                if (!Rules.VendingProtectRivalFurniture.Enabled) return false;
                 if (!BuildingManager.isBuildingTemporarilyEditable || !(bool)raised.GetValue(null)) return false;
                 if (!BuildingManager.IsInsideBuilding) return false;
                 var manager = InstanceBehavior<BuildingManager>.Instance;
                 var building = manager == null ? null : manager.buildingRegistration;
-                if (building == null || building.RentedByPlayer) return false;
-                return item.itemName == null || !item.itemName.StartsWith(OwnItemPrefix, StringComparison.Ordinal);
+                return building != null && !building.RentedByPlayer;
             }
             catch (Exception) { return false; }
         }

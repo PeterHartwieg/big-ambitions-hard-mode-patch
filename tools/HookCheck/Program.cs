@@ -39,6 +39,18 @@ foreach (var type in patch.GetTypes().Where(t => patchInterface.IsAssignableFrom
     Console.WriteLine($"{type.Name}: {hooks.Count - missing.Count}/{hooks.Count} hooks" + (missing.Count > 0 ? " MISSING " + string.Join(",", missing) : ""));
     foreach (MethodBase hook in hooks) if (hook != null) Console.WriteLine($"    {hook.DeclaringType.FullName}.{hook.Name}({string.Join(", ", hook.GetParameters().Select(p => p.ParameterType.Name + " " + p.Name))})");
     if (missing.Count > 0) { failures++; continue; }
+    // The bodies the patch relies on: the fingerprint read here must equal the reviewed one in the source.
+    var ilText = patch.GetType("HardModePatch.IlText", true).GetMethod("Fingerprint");
+    foreach (var check in (System.Collections.IEnumerable)type.GetMethod("Contracts").Invoke(instance, new object[] { target, hooks }))
+    {
+        var method = (MethodBase)check.GetType().GetField("Method").GetValue(check);
+        var contract = check.GetType().GetField("Contract").GetValue(check);
+        string name = (string)contract.GetType().GetField("Name").GetValue(contract);
+        string expected = (string)contract.GetType().GetField("Expected").GetValue(contract);
+        string actual = method == null ? "missing" : (string)ilText.Invoke(null, new object[] { method });
+        Console.WriteLine($"    contract {name}: {actual}" + (actual == expected ? " ok" : $" EXPECTED {expected}"));
+        if (actual != expected) failures++;
+    }
     // Applying checks what only Harmony checks: injected parameter names, return types and transpiler output.
     var harmony = new HarmonyLib.Harmony("hookcheck." + type.Name);
     try

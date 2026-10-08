@@ -40,6 +40,17 @@ namespace HardModePatch.Core
             return rate;
         }
 
+        // The rate change to pass on so that current + change stays within the cap. The mod saves the new
+        // rate as soon as it changes it, so the change itself has to be limited, not the result.
+        public static decimal ClampDelta(bool isLoan, bool isCard, decimal current, decimal delta)
+        {
+            decimal capped = ClampRate(isLoan, isCard, current + delta);
+            return capped < current + delta ? Math.Max(0m, capped - current) : delta;
+        }
+
+        public static decimal ClampFee(decimal feeRate) { return Math.Min(feeRate, MaxLoanFee); }
+        public static int ClampTerm(int termMonths) { return Math.Max(termMonths, MinLoanTermMonths); }
+
         // The mod draws an applicant's score, then raises it to the product's minimum, so a minimum of 850
         // turns every applicant into a perfect borrower. The drawn score is kept instead.
         public static int ApplicantScore(int productMinimum, int drawn)
