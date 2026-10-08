@@ -32,7 +32,13 @@ namespace HardModePatch
             return new[] { register, bakeryLoad };
         }
 
-        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks) { return new ContractCheck[0]; }
+        // OnLoadAsync names the items the price table is keyed by.
+        static readonly Contract LoadBody = new Contract("Bakery.OnLoadAsync", "d0fd788dfc9bc258");
+
+        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks)
+        {
+            return new[] { new ContractCheck(hooks[1], LoadBody) };
+        }
 
         public void Revert()
         {

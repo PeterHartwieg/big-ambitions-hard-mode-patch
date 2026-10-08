@@ -33,7 +33,14 @@ namespace HardModePatch
             return new MethodBase[] { capacity, cafeService };
         }
 
-        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks) { return new ContractCheck[0]; }
+        // The station count mirrors CafeServiceQuality.Calculate's pairing of PCs and seats.
+        static readonly Contract QualityBody = new Contract("CafeServiceQuality.Calculate", "006ad42c60015810");
+
+        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks)
+        {
+            var quality = target.GetType("InternetCafe.CafeServiceQuality", false);
+            return new[] { new ContractCheck(quality == null ? null : AccessTools.DeclaredMethod(quality, "Calculate"), QualityBody) };
+        }
 
         public void Revert() { }
 

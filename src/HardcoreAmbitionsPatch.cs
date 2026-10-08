@@ -31,6 +31,9 @@ namespace HardModePatch
         static readonly Contract EnforceBody = new Contract("EnforceHardcoreGameVariables", "6a1f72eb0f944748");
         static readonly Contract ReserveBody = new Contract("EnsureStartingReserve", "445cf66a78b31d76");
         static readonly Contract BootstrapBody = new Contract("TryBootstrapFromRunner", "c8983a876aa90151");
+        // How it finds the student loan and the terms it gives it, which RecalculatePostfix repeats.
+        static readonly Contract FindLoanBody = new Contract("FindStudentLoan", "2f1fb5f179acbf3e");
+        static readonly Contract LoanTermsBody = new Contract("ApplyStudentLoanTerms", "8e05800d4a1e7e4b");
 
         public TargetInfo Target { get { return Targets.HardcoreAmbitions; } }
 
@@ -57,11 +60,15 @@ namespace HardModePatch
         {
             var mod = target.GetType(ModType, false);
             var bootstrap = mod == null ? null : AccessTools.DeclaredMethod(mod, "TryBootstrapFromRunner", new[] { typeof(int) });
+            var findLoan = mod == null ? null : AccessTools.DeclaredMethod(mod, "FindStudentLoan", new[] { typeof(GameInstance) });
+            var loanTerms = mod == null ? null : AccessTools.DeclaredMethod(mod, "ApplyStudentLoanTerms", new[] { typeof(Loan) });
             return new[]
             {
                 new ContractCheck(hooks[EnforceHook], EnforceBody),
                 new ContractCheck(hooks[ReserveHook], ReserveBody),
-                new ContractCheck(bootstrap, BootstrapBody)
+                new ContractCheck(bootstrap, BootstrapBody),
+                new ContractCheck(findLoan, FindLoanBody),
+                new ContractCheck(loanTerms, LoanTermsBody)
             };
         }
 

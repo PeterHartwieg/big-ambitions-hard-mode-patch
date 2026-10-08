@@ -64,8 +64,9 @@ namespace HardModePatch
                     options.AddToggle(bound.Id, bound.LabelKey, bound.Default, value =>
                     {
                         if (bound.Enabled == value) return;
-                        bound.Enabled = value;
                         Log.Info(bound.Id + " turned " + (value ? "on" : "off") + ".");
+                        try { bound.Set(value); }
+                        catch (Exception ex) { Log.Error(bound.Id + ": " + ex); }
                     });
                 }
             }

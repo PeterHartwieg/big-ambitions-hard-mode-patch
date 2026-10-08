@@ -31,3 +31,21 @@ public class RulesTests
         Assert.False(HardcoreStart.ShouldRestoreVanillaPrices(snapshotTaken: false, saveIsHardcore: false));
     }
 }
+
+public class RuleChangeTests
+{
+    [Fact]
+    public void SetRaisesChangedOnlyOnARealChange()
+    {
+        var rule = new Rule("test_rule", Targets.EmpireBank, true);
+        int calls = 0;
+        bool last = true;
+        rule.Changed += value => { calls++; last = value; };
+        rule.Set(true);
+        Assert.Equal(0, calls);
+        rule.Set(false);
+        Assert.Equal(1, calls);
+        Assert.False(last);
+        Assert.False(rule.Enabled);
+    }
+}

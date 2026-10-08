@@ -2,7 +2,7 @@
 
 A Big Ambitions mod that rebalances other Workshop mods so they fit a hard game. It changes nothing on its own. When one of the mods below is installed, it patches that mod while the game runs, and every change can be switched off under Settings > Mods.
 
-**Status:** version 0.1.0, built against game build 3682. All six patches are written, and an offline check resolves and applies every hook against the reviewed versions of the six mods. One review round with three reviewers is done and its findings fixed. Nothing has been run in the game yet.
+**Status:** version 0.1.0, built against game build 3682. All six patches are written, and an offline check resolves and applies every hook against the reviewed versions of the six mods. Two review rounds with three reviewers are done and their findings fixed. Nothing has been run in the game yet.
 
 ## What it changes
 
@@ -14,11 +14,11 @@ A Big Ambitions mod that rebalances other Workshop mods so they fit a hard game.
 | [Meaningful Ambience](https://steamcommunity.com/sharedfiles/filedetails/?id=3810641423) | Decor adds a share of the customers the game sends (up to the preset, for example 10%), instead of a share of the building's capacity every open hour. Low customer promotion, marketing and quiet hours now carry through. | Decor adds a share of the customers the game sends |
 | [Bakery](https://steamcommunity.com/sharedfiles/filedetails/?id=3810927743) | Prices at vanilla bakery margins: bread $3.00 wholesale / $7.50 market, bun $2.00 / $5.00, chocolate cookie $1.50 / $3.80, latte $1.10 / $4.50, americano $0.90 / $3.90. Businesses that already set their own selling prices keep them. | Vanilla bakery margins (needs a restart) |
 | [Internet Cafe](https://steamcommunity.com/sharedfiles/filedetails/?id=3796860957) | While you're away, a cafe serves at most two customers per station per hour, matching its 30-minute sessions. A station is a PC with its own chair on the same desk or table, the way the cafe seats customers when you're there. | At most two customers per PC per hour |
-| [Vending Machines](https://steamcommunity.com/sharedfiles/filedetails/?id=3812054455) | While you place a machine in a rival's building, only vending items can be picked up and the Interior Designer doesn't open. The rival's furniture stays locked. | Rival furniture stays locked while placing a machine |
+| [Vending Machines](https://steamcommunity.com/sharedfiles/filedetails/?id=3812054455) | While you place a machine in a rival's building, only vending items can be picked up, a sign's "change text" does nothing, and the Interior Designer doesn't open. The rival's furniture stays locked. | Rival furniture stays locked while placing a machine |
 | [Empire Bank](https://steamcommunity.com/sharedfiles/filedetails/?id=3781110629) | Interest withdrawals are taxed at your save's tax rate when you take them out. | Tax withdrawals |
 | | Neither emergency funding button (Risk Center or the dashboard's liquidity warning) borrows from the central bank. | No emergency central bank borrowing |
 | | Applicants keep the credit score they were given; a product's minimum no longer raises everyone to it. | Honest credit scores |
-| | Loan APR at most 15%, origination fee at most 3%, loan term at least 6 months, card APR at most 30%. Applies to product edits, products already in a save, approvals and corporate facility negotiations. Contracts already signed keep their terms. | Product limits |
+| | Loan APR at most 15%, origination fee at most 3%, loan term at least 6 months, card APR at most 30%. Applies to product edits, products and pending applications already in a save, approvals, corporate facility offers and accepted offers not yet finalised. Switching the option on mid-game applies it to the open bank at once. Contracts already signed keep their terms. | Product limits |
 | | No requests to the author's statistics and supporters servers. The opt-in heartbeat in Empire Bank's own settings is unchanged. | No requests to the author's servers |
 
 The student loan keeps Hardcore Ambitions' own terms: $16 interest and a $158 payment a day, also after you change the interest setting mid-game.

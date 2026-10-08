@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using HardModePatch.Core;
 using HarmonyLib;
+using Controllers;
 using UI.InteriorDesigner;
 
 namespace HardModePatch
@@ -12,7 +13,8 @@ namespace HardModePatch
     // can be placed there. The same flag lets the player pick up and move any item in that building, and
     // offers "change text" on a rival's sign, which opens the Interior Designer with its move and sell
     // tools. While the mod has the flag up (RivalPlacement._raised) in a rival's building, only its own
-    // items can be picked up and the Interior Designer doesn't open.
+    // items can be picked up, a sign's change-text action is cancelled before it touches the designer,
+    // and the Interior Designer doesn't open.
     public sealed class VendingMachinesPatch : ITargetPatch
     {
         const string OwnItemPrefix = "vendingmachines:";
@@ -29,11 +31,19 @@ namespace HardModePatch
             {
                 ready ? AccessTools.Method(typeof(ItemController), "SecondaryInteract", Type.EmptyTypes) : null,
                 ready ? AccessTools.Method(typeof(ItemController), "TryToGrabItem", Type.EmptyTypes) : null,
-                ready ? AccessTools.DeclaredMethod(typeof(InteriorDesignerUI), "Show", Type.EmptyTypes) : null
+                ready ? AccessTools.DeclaredMethod(typeof(InteriorDesignerUI), "Show", Type.EmptyTypes) : null,
+                ready ? AccessTools.DeclaredMethod(typeof(ItemWithTextController), "OpenChangeTextOverlayInInteriorDesigner", Type.EmptyTypes) : null
             };
         }
 
-        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks) { return new ContractCheck[0]; }
+        // RivalPlacement.Tick decides when _raised is set; the lock relies on what it means.
+        static readonly Contract TickBody = new Contract("RivalPlacement.Tick", "53e8156f9697eeb9");
+
+        public IList<ContractCheck> Contracts(Assembly target, IList<MethodBase> hooks)
+        {
+            var placement = target.GetType("VendingMachines.Game.RivalPlacement", false);
+            return new[] { new ContractCheck(placement == null ? null : AccessTools.DeclaredMethod(placement, "Tick", Type.EmptyTypes), TickBody) };
+        }
 
         public void Revert() { }
 
@@ -42,6 +52,14 @@ namespace HardModePatch
             harmony.Patch(hooks[0], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "InteractPrefix"));
             harmony.Patch(hooks[1], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "GrabPrefix"));
             harmony.Patch(hooks[2], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "DesignerPrefix"));
+            harmony.Patch(hooks[3], prefix: new HarmonyMethod(typeof(VendingMachinesPatch), "SignTextPrefix"));
+        }
+
+        // The sign action disables designer tools, opens the designer and runs a tool regardless of whether
+        // it opened, so it is cancelled as a whole.
+        static bool SignTextPrefix()
+        {
+            return !InRivalPlacement();
         }
 
         static bool DesignerPrefix()

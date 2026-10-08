@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace HardModePatch.Core
@@ -10,6 +11,8 @@ namespace HardModePatch.Core
         public readonly TargetInfo Target;
         public readonly bool Default;
         public bool Enabled;
+        // Raised when the player switches the rule on or off, for patches that act on the change itself.
+        public event Action<bool> Changed;
 
         public Rule(string id, TargetInfo target, bool defaultValue)
         {
@@ -17,6 +20,14 @@ namespace HardModePatch.Core
             Target = target;
             Default = defaultValue;
             Enabled = defaultValue;
+        }
+
+        public void Set(bool value)
+        {
+            if (Enabled == value) return;
+            Enabled = value;
+            var changed = Changed;
+            if (changed != null) changed(value);
         }
 
         // The options page label is a key in Locales/en.json.
