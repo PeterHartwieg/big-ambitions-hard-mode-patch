@@ -1,0 +1,11 @@
+{
+  "hardmode_title": "Hard Mode Patch",
+  "hardmode_target_hardcore": "Hardcore Ambitions",
+  "hardmode_hardcore_keep_difficulty": "Keep my difficulty settings (still start in debt)",
+  "hardmode_hardcore_no_funds": "Start without the investment funds",
+  "hardmode_hardcore_vehicle_prices_per_save": "Hardcore vehicle prices only in Hardcore saves",
+  "hardmode_state_verified": "Patched (reviewed version)",
+  "hardmode_state_unverified": "Patched (new version, not yet reviewed)",
+  "hardmode_state_incompatible": "Not patched: this version changed the methods the patch needs",
+  "hardmode_state_missing": "Not installed or not loaded"
+}

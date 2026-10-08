@@ -1,0 +1,10 @@
+bin/
+obj/
+build/
+*.user
+.vs/
+.idea/
+CLAUDE.local.md
+
+# Game and Harmony DLLs belong to their owners and are never committed.
+*.dll
