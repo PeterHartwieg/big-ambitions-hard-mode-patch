@@ -33,7 +33,7 @@ CSC="$SDK_DIR/Roslyn/bincore/csc.dll"
 [ -f "$CSC" ] || { echo "C# compiler not found at $CSC" >&2; exit 1; }
 
 rm -rf "$OUT"
-mkdir -p "$OUT/Dependencies" "$OUT/Locales"
+mkdir -p "$OUT/Dependencies" "$OUT/Locales" "$OUT/docs"
 REFS=()
 for dll in mscorlib System System.Core netstandard BigAmbitions BigAmbitions.Items BigAmbitions.ModAPI HGExtensions HGPlugins UnityEngine.CoreModule; do
   REFS+=("-reference:$GAME_DLLS/$dll.dll")
@@ -48,4 +48,5 @@ cp "$DEPS/0Harmony.dll" "$OUT/Dependencies/0Harmony.dll"
 cp "$DEPS/Harmony-LICENSE.txt" "$OUT/Dependencies/Harmony-LICENSE.txt"
 cp "$REPO"/config/Locales/*.json "$OUT/Locales/"
 cp "$REPO/README.md" "$REPO/LICENSE.txt" "$OUT/"
+cp "$REPO/docs/hyperreal-map-return.md" "$REPO/docs/factory-diplomas.md" "$OUT/docs/"
 shasum -a 256 "$OUT/HardModePatch.dll"

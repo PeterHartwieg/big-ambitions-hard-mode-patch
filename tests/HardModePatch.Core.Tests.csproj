@@ -12,6 +12,6 @@
     <ProjectReference Include="../Core/HardModePatch.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="../config/Locales/en.json" Link="Locales/en.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../config/Locales/*.json" Link="Locales/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -52,7 +52,8 @@ foreach (var entry in new[] { ("BakeryPatch", bakery), ("HyperrealPatch", hyperr
     try
     {
         type.GetMethod("Apply").Invoke(instance, new object[] { harmony, entry.Item2, hooks });
-        var patched = entry.Item1 == "BakeryPatch" ? new[] { hooks[0], hooks[2], hooks[3], hooks[4] } : hooks.ToArray();
+        var patched = entry.Item1 == "BakeryPatch" ? new[] { hooks[0], hooks[2], hooks[3], hooks[4] }
+            : hooks.Take(6).Concat(new[] { hooks[7] }).ToArray();
         Check(patched.All(h => Harmony.GetPatchInfo(h)?.Owners.Contains(harmony.Id) == true), entry.Item1 + " every intended hook actually applied");
         MethodBase target = entry.Item1 == "BakeryPatch" ? hooks[2] : hooks[0];
         string transpiler = entry.Item1 == "BakeryPatch" ? "HelpLookupTranspiler" : "ScanTranspiler";
@@ -156,12 +157,102 @@ foreach (var entry in new[] { ("BakeryPatch", bakery), ("HyperrealPatch", hyperr
                 method.Invoke(null, method.GetParameters().Select(p => Activator.CreateInstance(p.ParameterType)).ToArray());
                 Check(!(bool)cacheType.GetProperty("Ready").GetValue(cache), callback + " releases scene cache");
             }
+
+            // Exercise the actual Harmony postfix with the author's engine work stubbed out.
+            // Only managed test objects and HDRP's reset flag are used; this cannot test GPU recovery.
+            var probeHarmony = new Harmony("performancecheck.map-probes");
+            try
+            {
+                probeHarmony.Patch(hooks[3], prefix: new HarmonyMethod(typeof(Probes), nameof(Probes.SkipOriginal)));
+                probeHarmony.Patch(hooks[5], prefix: new HarmonyMethod(typeof(Probes), nameof(Probes.SkipOriginal)));
+                probeHarmony.Patch(hooks[6], prefix: new HarmonyMethod(typeof(Probes), nameof(Probes.HdCameraPrefix)));
+                Type mapType = hyperreal.GetType("PolyModsHyperreal.MapMode", true);
+                Type envType = hyperreal.GetType("PolyModsHyperreal.GameEnvironment", true);
+                Type cfgType = hyperreal.GetType("PolyModsHyperreal.HRConfig", true);
+                object map = RuntimeHelpers.GetUninitializedObject(mapType);
+                object env = RuntimeHelpers.GetUninitializedObject(envType);
+                object cfg = RuntimeHelpers.GetUninitializedObject(cfgType);
+                object volume = RuntimeHelpers.GetUninitializedObject(hooks[3].DeclaringType);
+                Type exposureType = hdrp.GetType("UnityEngine.Rendering.HighDefinition.Exposure", true);
+                object exposure = InertEngineObject(exposureType, 11);
+                FieldInfo mode = AccessTools.Field(exposureType, "mode");
+                object modeParameter = RuntimeHelpers.GetUninitializedObject(mode.FieldType);
+                FieldInfo value = AccessTools.Field(mode.FieldType, "m_Value");
+                mode.SetValue(exposure, modeParameter);
+                AccessTools.Field(volume.GetType(), "_exposure").SetValue(volume, exposure);
+                object camera = InertEngineObject(hooks[5].GetParameters()[0].ParameterType, 12);
+                Probes.HdCamera = RuntimeHelpers.GetUninitializedObject(hooks[6].DeclaringType);
+                var reset = AccessTools.Field(hooks[6].DeclaringType, "resetPostProcessingHistory");
+                var colorHistory = AccessTools.Field(hooks[6].DeclaringType, "colorPyramidHistoryIsValid");
+                colorHistory.SetValue(Probes.HdCamera, true);
+                FieldInfo closed = AccessTools.Field(game.GetType("GlobalEvents", true), "onCityMapClosed");
+                void CloseCamera() => ((Action)closed.GetValue(null))();
+                void Frame(bool open, bool engaged, float blend, bool on = true)
+                {
+                    AccessTools.Field(mapType, "<Open>k__BackingField").SetValue(map, open);
+                    AccessTools.Field(mapType, "<Engaged>k__BackingField").SetValue(map, engaged);
+                    AccessTools.Field(mapType, "<Blend>k__BackingField").SetValue(map, blend);
+                    hooks[5].Invoke(volume, new object[] { camera, null });
+                    hooks[3].Invoke(volume, new object[] { on, env, cfg, map });
+                }
+                void Mode(int selected) => value.SetValue(modeParameter, Enum.ToObject(value.FieldType, selected));
+                bool WasReset() => (bool)reset.GetValue(Probes.HdCamera);
+                void Arm() { reset.SetValue(Probes.HdCamera, false); Frame(true, true, 1f, false); }
+                Mode(4);
+                hooks[7].Invoke(null, null);
+                hooks[7].Invoke(null, null);
+                Check(((Delegate)closed.GetValue(null)).GetInvocationList().Count(d => d.Method.DeclaringType == type) == 1,
+                    "game event initialization retains exactly one map-close handler across reloads");
+                Arm();
+                Frame(false, false, 0f);
+                Check(!WasReset(), "actual postfix waits for camera completion even after zero blend");
+                CloseCamera();
+                Frame(false, false, 0.1f);
+                Check(!WasReset(), "actual postfix waits for fade after camera completion");
+                Frame(false, false, 0f);
+                Check(WasReset() && ReferenceEquals(Probes.RequestedCamera, camera) && (bool)colorHistory.GetValue(Probes.HdCamera),
+                    "automatic return sets only exposure/postprocessing reset flag on Hyperreal's supplied camera");
+                reset.SetValue(Probes.HdCamera, false);
+                Frame(false, false, 0f);
+                Check(!WasReset(), "actual postfix resets only once per return");
+                Mode(0); Arm(); CloseCamera(); Frame(false, false, 0f);
+                Check(!WasReset(), "fixed exposure is unchanged");
+                Mode(4); Frame(false, false, 0f);
+                Check(!WasReset(), "ineligible fixed return does not leave a delayed reset armed");
+                Arm(); CloseCamera(); AccessTools.Field(envType, "Indoors").SetValue(env, true); Frame(false, false, 0f);
+                Check(!WasReset(), "indoor return is unchanged");
+                AccessTools.Field(envType, "Indoors").SetValue(env, false);
+                Arm(); CloseCamera(); Toggle("HyperrealMapReturnFix", false); Frame(false, false, 0f);
+                Check(!WasReset(), "option off cancels pending exposure reset");
+                Toggle("HyperrealMapReturnFix", true); Frame(false, false, 0f);
+                Check(!WasReset(), "enabling does not reset unrelated gameplay");
+                Arm(); CloseCamera(); hooks[4].Invoke(map, null); Frame(false, false, 0f);
+                Check(!WasReset(), "author's Map.Reset cancels pending return");
+                Arm(); CloseCamera(); hooks[7].Invoke(null, null); Frame(false, false, 0f);
+                Check(!WasReset(), "game event initialization cancels old return state");
+                foreach (string callback in new[] { "SceneLoaded", "SceneUnloaded" })
+                {
+                    Arm(); CloseCamera();
+                    var method = AccessTools.Method(type, callback);
+                    method.Invoke(null, method.GetParameters().Select(p => Activator.CreateInstance(p.ParameterType)).ToArray());
+                    Frame(false, false, 0f);
+                    Check(!WasReset(), callback + " cancels pending map return");
+                }
+                Arm(); CloseCamera(); Frame(false, false, 0f);
+                Check(WasReset(), "map return still works after game event initialization");
+            }
+            finally { probeHarmony.UnpatchAll(probeHarmony.Id); }
         }
     }
     finally
     {
         harmony.UnpatchAll(harmony.Id);
         type.GetMethod("Revert").Invoke(instance, null);
+        if (entry.Item1 == "HyperrealPatch")
+        {
+            var closed = AccessTools.Field(game.GetType("GlobalEvents", true), "onCityMapClosed").GetValue(null) as Delegate;
+            Check(closed == null || !closed.GetInvocationList().Any(d => d.Method.DeclaringType == type), "revert removes map-close handler");
+        }
     }
 }
 // The same original Bakery bytes without a readable file identity are deliberately unverified.
@@ -175,11 +266,26 @@ foreach (var entry in new[] { ("BakeryPatch", bakery), ("HyperrealPatch", hyperr
     Check(hooks.Count == 2 && hooks.All(h => h != null) && contracts.Count == 1,
         "unverified Bakery keeps independent price hooks/contracts and omits optional Help hooks");
 }
+{
+    Type type = patch.GetType("HardModePatch.HyperrealPatch", true);
+    var unverified = Assembly.Load(File.ReadAllBytes(hyperreal.Location));
+    var hooks = (IList<MethodBase>)type.GetMethod("ResolveHooks").Invoke(Activator.CreateInstance(type), new object[] { unverified });
+    Check(hooks[0] == null && hooks[3] == null,
+        "unreadable Hyperreal identity rejects discovery and map workaround before installation");
+}
 Console.WriteLine($"ALL {checks} PERFORMANCE CHECKS PASSED (offline; live Help and lighting still require a playtest)");
 return 0;
 
 public static class Probes
 {
+    public static object HdCamera, RequestedCamera;
+    public static bool SkipOriginal() => false;
+    public static bool HdCameraPrefix(object camera, ref object __result)
+    {
+        RequestedCamera = camera;
+        __result = HdCamera;
+        return false;
+    }
     public static int Populations;
     public static object Host;
     public static bool ForceRefresh;

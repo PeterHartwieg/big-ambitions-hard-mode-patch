@@ -48,6 +48,9 @@ namespace HardModePatch.Core
         // Ours: RLO's jobs and gigs pay in full to a player who runs businesses (RLO cuts 15% per business).
         public static readonly Rule OwnerJobFullPay = new Rule("owner_job_full_pay", null, false);
 
+        // The series opts into RLO school diplomas for advanced factory machine purchases.
+        public static readonly Rule FactoryDiplomas = new Rule("factory_diplomas", Targets.RealLifeOverhaul, false);
+
         // Hardcore Ambitions: keep the indebted start, drop what fights a custom difficulty.
         public static readonly Rule HardcoreKeepDifficulty = new Rule("hardcore_keep_difficulty", Targets.HardcoreAmbitions, true);
         public static readonly Rule HardcoreNoFunds = new Rule("hardcore_no_funds", Targets.HardcoreAmbitions, true);
@@ -60,6 +63,7 @@ namespace HardModePatch.Core
         public static readonly Rule BakeryVanillaMargins = new Rule("bakery_vanilla_margins", Targets.Bakery, true);
         public static readonly Rule BakeryHelpDiscovery = new Rule("bakery_help_discovery", Targets.Bakery, true);
         public static readonly Rule HyperrealLightDiscovery = new Rule("hyperreal_light_discovery", Targets.Hyperreal, true);
+        public static readonly Rule HyperrealMapReturnFix = new Rule("hyperreal_map_return_fix", Targets.Hyperreal, true);
 
         // Internet Cafe: off-screen customers limited by the PCs, two 30-minute sessions per PC per hour.
         public static readonly Rule CafePcCapacity = new Rule("cafe_pc_capacity", Targets.InternetCafe, true);
@@ -79,11 +83,11 @@ namespace HardModePatch.Core
             IndebtedScenario,
             RentRebalance,
             HappinessRebalance,
-            OwnerJobFullPay,
+            OwnerJobFullPay, FactoryDiplomas,
             HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave,
             AmbienceScalesWithDemand,
             BakeryVanillaMargins,
-            BakeryHelpDiscovery, HyperrealLightDiscovery,
+            BakeryHelpDiscovery, HyperrealLightDiscovery, HyperrealMapReturnFix,
             CafePcCapacity,
             VendingProtectRivalFurniture,
             BankTaxWithdrawals, BankNoEmergencyBorrowing, BankHonestCreditScores, BankProductLimits, BankNoRemoteRequests

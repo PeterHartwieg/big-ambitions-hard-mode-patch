@@ -229,9 +229,9 @@ if (rloPath != null)
     MethodInfo loaded = hap.GetMethod("LoadedPostfix", BindingFlags.Static | BindingFlags.NonPublic);
     SetHapRule(true);
     loaded.Invoke(null, new object[] { list });
-    Check((int)Get(show, "amount") == 10 && (int)Get(show, "maxHoursDuration") == 120 && (int)Get(first, "amount") == 60, "listed modifiers set, others untouched");
+    Check((int)Get(show, "amount") == 12 && (int)Get(show, "maxHoursDuration") == 120 && (int)Get(first, "amount") == 60, "listed modifiers set, others untouched");
     loaded.Invoke(null, new object[] { list });
-    Check((int)Get(show, "amount") == 10, "a second load doesn't compound the values");
+    Check((int)Get(show, "amount") == 12, "a second load doesn't compound the values");
     MethodInfo add = hap.GetMethod("AddPrefix", BindingFlags.Static | BindingFlags.NonPublic);
     var grant = new object[] { "ba:happinessmodifier_watched_show", 6, true };
     add.Invoke(null, grant);

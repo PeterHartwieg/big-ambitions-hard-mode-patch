@@ -10,8 +10,9 @@ public class RulesTests
     public void RuleIdsAreUniqueAndTargetPatchesStartOnTheirHardDefaults()
     {
         Assert.Equal(Rules.All.Count, Rules.All.Select(r => r.Id).Distinct().Count());
-        Assert.All(Rules.All.Where(r => r.Target != null), r => Assert.True(r.Default));
+        Assert.All(Rules.All.Where(r => r.Target != null && r != Rules.FactoryDiplomas), r => Assert.True(r.Default));
         Assert.False(Rules.IndebtedScenario.Default);
+        Assert.False(Rules.FactoryDiplomas.Default);
     }
 
     [Fact]

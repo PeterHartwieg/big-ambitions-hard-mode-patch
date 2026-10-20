@@ -32,9 +32,10 @@ namespace HardModePatch
                 patcher = new Patcher(new Harmony(HarmonyId), new ITargetPatch[]
                 {
                     new HardcoreAmbitionsPatch(), new MeaningfulAmbiencePatch(), new BakeryPatch(),
-                    new InternetCafePatch(), new VendingMachinesPatch(), new EmpireBankPatch(), new HyperrealPatch()
+                    new InternetCafePatch(), new VendingMachinesPatch(), new EmpireBankPatch(), new HyperrealPatch(), new RealLifeOverhaulPatch()
                 });
                 patcher.Start();
+                RealLifeOverhaulPatch.ReportAvailability();
                 Options.Register(context.ModId, patcher);
                 Log.Info("Version " + Version + " active, Harmony " + typeof(Harmony).Assembly.GetName().Version + ". Mods not loaded yet are patched when they load.");
             }

@@ -1,6 +1,6 @@
 # Plan
 
-A public Workshop mod with a standalone indebted start and optional runtime balance patches. Revised 15 October for Peter's RLO-led life-simulation pack: borrowing is allowed subject to realistic debt/leverage balance, and Hardcore Ambitions is dropped from that pack. The six older patches remain available for other configurations. The reviewed target versions are in `Core/Targets.cs`; the original reviews are in the HART repository. Nothing here has run in game.
+A public Workshop mod with a standalone indebted start and optional runtime balance patches. Revised 15 October for Peter's RLO-led life-simulation pack: borrowing is allowed subject to realistic debt/leverage balance, and Hardcore Ambitions is dropped from that pack. The six older patches remain available for other configurations. The reviewed target versions are in `Core/Targets.cs`; the original reviews are in the HART repository. In-game validation is partial; each section records its limits.
 
 ## Standalone scenario, implemented in 0.2.0
 
@@ -41,6 +41,22 @@ Peter's exported 18 October trace has recurring ~89 ms frames 1.08 seconds apart
 - Hyperreal: seed a light cache once on demand, including inactive lights; update it from HDRP light enable/destroy callbacks, and invalidate on scene load/unload or option changes. Its existing eight-second scan consumes that cache and retains its own lighting/restoration/foliage logic. New inactive lights are discovered when first enabled. Scene transitions still incur an initial discovery; foliage discovery when new street lamps appear remains a possible hitch.
 - Independent default-on options; reviewed Bakery/Hyperreal and game/Unity Core/HGExtensions/HDRP fingerprints required for the applicable performance hooks. Unknown builds keep their original discovery. Log discovery counts, cache activity and measured scan duration without per-frame log spam. City Performance remains the frame-trace recorder for the A/B playtest.
 - 94 core tests, 32 focused offline performance checks, and all seven target hook/contract checks pass. Astra and Sol reviewed; fixed optional Help compatibility so it cannot disable Bakery pricing, including a partial-install rollback, and added a one-time Help population when enabling after the retry timeout. The harness checks both fixes and that the pre-patch delegate reaches patched discovery. In-game Help entries, day/night lights, switching options, save reload and frame-time gains remain playtest checks.
+
+## Hyperreal map return, implemented 19 October (unreleased; awaiting playtest)
+
+- Peter reports occasional pitch-black evening/night rendering after closing the map, sometimes relieved by zoom. [Diagnosis](hyperreal-map-return.md): the leading hypothesis is Hyperreal's fixed-to-histogram exposure-history handoff, at moderate confidence. No persistent CPU restore defect or lamp-cache cause was found. The log has no marked occurrence or GPU-state capture.
+- Extend the existing `HyperrealPatch` with default-on `hyperreal_map_return_fix`. Postfix `EnhancementVolume.Ensure` records the author's actual camera; postfix `Apply` requests one HDRP `resetPostProcessingHistory` only after both `GlobalEvents.onCityMapClosed` and zero map blend, outdoors in AutomaticHistogram mode. No exposure values or lighting values are forced.
+- `MapMode.Reset`, scenes, option changes and `GlobalEvents.Init` clear pending state. Postfix `GlobalEvents.Init` reattaches the deduplicated map-close handler because the game clears it on load. Revert removes subscriptions. Exact reviewed Hyperreal `7d1bd589947558e2`, game, Unity Core and HDRP hashes remain required; all eight touched/referenced methods have body contracts in `ResolveHooks`/`Contracts`.
+- Checks: build passes; 8/8 Hyperreal members and contracts resolve and Harmony applies (Bakery also passes; other target DLLs were absent). 49 focused offline checks cover both discovery patches and map-return guards/lifecycle, using inert engine objects. 38 ScenarioCheck checks pass against RLO 0.38.0. Core test assembly compiles; VSTest cannot bind its communication socket in this sandbox, so all 103 Fact/InlineData cases were invoked successfully in-process instead. This does not validate rendering.
+- Astra and Sol reviewed diagnosis and implementation; their lifecycle/camera findings were fixed. The local notes also request Opus, which is unavailable in this session. Keep release version at 0.4.1 until Peter chooses a release number; no mandatory bump rule was found. No installation or game/save changes made.
+
+## Advanced factory diplomas, implemented 20 October (unreleased; awaiting playtest)
+
+- Option `factory_diplomas`, off by default. Three native RLO vocational school diplomas, ids 18, 19, 34: eight four-hour classes, three a week, four homework pieces and an exam. Base fees $3,600 garment making, $3,900 electronics technician, $3,800 jewelry and goldsmithing. Existing skills; full-time schedules do not overlap.
+- Runtime-only injection into reviewed RLO 0.41.1's `StudyCatalogue.All` before city careers/save reading; `CareersDirector.Offered` hides new enrolments while the option is off. `StudyFile.Holds` supplies the qualification. RLO's own class, exam, masks and save codec handle progress and results.
+- Game prefixes: `PlayerItemPurchaser.GrabItem` and `PurchaseUI.PlaceOrder`, before unpaid cargo or checkout state changes. Only the three exact machine keys are gated; laser, plain workstation and owned production remain available. No RLO files changed.
+- Missing, changed, stopped or faulted dependencies leave sales unrestricted, logging once per reason. Option off retains all records; HMP removal lets RLO skip unknown diploma records safely, losing them on resave without clearing ordinary courses, skills or student debt.
+- See [full design, compatibility boundary, validation and playtest](factory-diplomas.md). Build/core, FactoryCheck and existing harness results are recorded there; live Campus, school activities, Mono initialization and save/depot behavior remain unverified. Version stays 0.4.1.
 
 ## Planned for 0.5.0: Alcware Seasons follows RLO's calendar
 

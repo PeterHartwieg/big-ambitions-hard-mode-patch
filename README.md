@@ -2,7 +2,7 @@
 
 A Big Ambitions mod with an optional indebted starting scenario and runtime balance patches for other Workshop mods. Every change has an option under Settings > Mods. The scenario is off by default; with it off and no target mod installed, this changes nothing.
 
-**Status:** version 0.4.1, built against game build 3682. Includes Bakery and Hyperreal discovery optimizations, the standalone starting scenario, rent and happiness rebalances. 94 core tests and 32 focused offline performance checks pass; all seven target patches resolve/apply against the locally reviewed DLLs. The 38 scenario/rebalance checks also pass against the currently installed RLO 0.38.0. The performance changes passed Astra and Sol code review after fixes. Their in-game effect still needs an A/B trace; offline checks do not validate live Help or lighting.
+**Status:** version 0.4.1, built against game build 3682. Includes discovery optimizations, the starting scenario, rent/happiness rebalances and opt-in advanced factory diplomas. Offline checks pass: 108 core cases, 57 factory checks, 38 scenario/rebalance checks against RLO 0.41.1 and 49 performance checks. Hook/contract checks pass for the five locally available target DLLs; Hardcore Ambitions, Empire Bank and Vending Machines were unavailable for this run. Live Campus/depot behavior, the map-return workaround and frame-time improvements still need playtests.
 
 ## Recurring hitch fixes
 
@@ -17,6 +17,14 @@ Performance hooks require the reviewed Bakery `6d68edab0f5600f5` / Hyperreal `7d
 
 For the next playtest, compare the same route with each switch on/off, then check Bakery Help after waiting over two minutes, toggling the option and changing language, plus street lights at night and after reloading a save. In-game validation is pending.
 
+## Hyperreal map-return workaround (awaiting playtest)
+
+**Reset Hyperreal exposure history after returning from the city map** (`hyperreal_map_return_fix`, on by default) requests one HDRP postprocessing-history reset after the game's camera return and Hyperreal's closing fade both finish. It acts only outdoors when Hyperreal has resumed Automatic Histogram exposure, on the camera Hyperreal supplied that frame. Fixed exposure and indoor returns are left alone. The lamp-discovery switch is independent.
+
+This addresses the leading hypothesis for Peter's 19 October report of darkness after leaving the map. The supplied log cannot identify the black frame, so symptom resolution is **unverified**. The original lamp cache does not change exposure or drop disabled lamps. See [the diagnosis and test procedure](docs/hyperreal-map-return.md) for ranked evidence and remaining alternatives.
+
+The workaround requires the same reviewed Hyperreal/game/Unity/HDRP binaries as discovery. Unknown binaries leave Hyperreal unpatched. `Player.log` records `Hyperreal map return: reset exposure history...` once when it acts. Loading another save restores the map-close subscription; scene changes, game-event initialization, Hyperreal reset and option changes cancel pending returns. Version remains 0.4.1 for Peter to choose the release number.
+
 ## Rent rebalance
 
 With **Flats at twice and shops at three times the market rent** on (Settings > Mods, off by default), every lease you sign costs twice the market rent for a flat and three times for any other building. Deposits keep the game's usual number of days, so they rise with the rent; leases already signed keep their rent. Rivals' estimated income keeps the game's rent, so rival survival and the Rivals leaderboard don't change.
@@ -24,6 +32,12 @@ With **Flats at twice and shops at three times the market rent** on (Settings > 
 ## Happiness rebalance
 
 With **Home activities bank up to four days…** on (Settings > Mods, off by default), home activities give a smaller boost that banks up to four days, so home tops out around 60. Outside activities (cinema, theatre, golf, tennis, casino, swimming, clubs, the pier, walks) give their boost for 4 to 7 days from one visit, so reaching 100 takes a mix of them. "No home" counts −15 instead of −50 while Real Life Overhaul has a hotel room booked for you. Other mods' happiness effects are unchanged.
+
+## Advanced factory diplomas (awaiting playtest)
+
+With **Require trade diplomas to buy sewing, kiln and polishing machines** on (off by default), the Factory Supply Depot requires the corresponding garment making, electronics technician or jewelry and goldsmithing diploma. HMP adds these as native RLO school courses: eight four-hour classes, three a week, four homework pieces and an exam; base tuition $3,600, $3,900 and $3,800. Their full-time schedules do not overlap. Already-owned machines keep working; the Laser Cutting Machine and plain consumer-goods workstation have no new restriction.
+
+Requires reviewed RLO 0.41.1 with careers and study enabled. Missing/incompatible RLO or unavailable study leaves purchases unrestricted. Turning HMP's option off keeps diploma progress/results and opens sales; removing HMP makes unmodified RLO safely ignore the extra course records and discard them on its next save. Ordinary courses, skills and student debt remain readable. See [design, hooks, save behavior and playtest](docs/factory-diplomas.md). Offline checks pass; Campus UI, physical school activities, live purchases and actual save/load still need an in-game check.
 
 ## Indebted starting scenario
 
@@ -85,6 +99,7 @@ dotnet test tests/HardModePatch.Core.Tests.csproj
 tools/check-hooks.sh <folder holding the target mods' DLLs>
 dotnet run --project tools/ScenarioCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 dotnet run --project tools/PerformanceCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <folder containing Bakery.dll and PolyModsHyperreal.dll>
+dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 ```
 
 `tools/check-hooks.sh` loads the built patch, the game's assemblies and the target mods' DLLs in .NET, resolves every hook and applies every patch with Harmony, then removes them. It catches renamed methods, changed signatures and mismatched patch parameters without starting the game. It needs the Unity modules in `build/game-dlls` as well; copy every `Unity*.dll` from the game's `Managed` folder there.
@@ -92,6 +107,8 @@ dotnet run --project tools/PerformanceCheck -- build/game-dlls build/HardModePat
 `ScenarioCheck` exercises the standalone scenario against native data containers and optionally the selected RLO DLL's game-free loan tracking/holds. It does not launch Unity, read a save or execute nightly game settlement. Its bank settings are illustrative, not extracted real-bank assets. Omit the final DLL argument for scenario-only checks.
 
 `PerformanceCheck` verifies exact hook application, the single-call transpiler substitutions, original-body preservation, pre-patch delegates, Help refresh scope and enabling on an existing singleton, typed light cache updates, scene/toggle invalidation and unverified-Bakery price fallback. Engine objects are inert test data; no native rendering/UI or real saves are exercised.
+
+`FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1: native course definitions, study/save logic, purchase refusals and fail-safe states, without Unity or a live save.
 
 `tools/build.sh` compiles with the SDK's C# compiler against the game's own `mscorlib`, so the package runs on the game's Mono runtime. Harmony 2.4.2 is downloaded and checked against a pinned hash.
 

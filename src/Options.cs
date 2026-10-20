@@ -83,7 +83,11 @@ namespace HardModePatch
             {
                 if (rule.Enabled == value) return;
                 Log.Info(rule.Id + " turned " + (value ? "on" : "off") + ".");
-                try { rule.Set(value); }
+                try
+                {
+                    rule.Set(value);
+                    if (rule == Rules.FactoryDiplomas) RealLifeOverhaulPatch.ReportAvailability();
+                }
                 catch (Exception ex) { Log.Error(rule.Id + ": " + ex); }
             });
         }

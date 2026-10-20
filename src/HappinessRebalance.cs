@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BAModAPI.Services;
 using HardModePatch.Core;
 using HarmonyLib;
 using Helpers;
@@ -13,7 +14,9 @@ namespace HardModePatch
     //   and they are never in the list);
     // - AddModifier: an outside activity's result gets its whole duration from one visit;
     // - UpdateHappiness: "no home" counts -15 instead of -50 while RLO says a hotel room is booked. RLO is read by
-    //   name, never patched; without it the game's -50 stands.
+    //   name, never patched; without it the game's -50 stands. The phone shows the amount the last update left, and
+//   the game updates only on the hour or a new mood, so a booking that changes in between (a load, a check-in,
+//   checkout) is caught once a second and the update is run then.
     // The game's values are kept, so switching the rule off puts them back at once.
     // Keep every patched method in ResolveHooks, also exercised by the offline checks.
     public static class HappinessRebalance
@@ -23,6 +26,7 @@ namespace HardModePatch
         static FieldInfo registry;
         static Func<bool> hotelBooked;
         static bool hotelLookupDone;
+        static float nextLook;
         public static bool Available { get; private set; }
 
         public static IList<MethodBase> ResolveHooks()
@@ -49,6 +53,7 @@ namespace HardModePatch
                 if (hooks.Any(h => h == null) || registry == null) throw new MissingMethodException("Happiness hooks changed.");
                 ApplyHooks(harmony, hooks);
                 Rules.HappinessRebalance.Changed += on => Reapply();
+                UnityLifecycleProvider.OnUpdate += WatchBooking;
                 Available = true;
             }
             catch (Exception ex)
@@ -61,6 +66,7 @@ namespace HardModePatch
 
         public static void Stop()
         {
+            UnityLifecycleProvider.OnUpdate -= WatchBooking;
             harmony.UnpatchAll(harmony.Id);
             Restore(Registered());
             Available = false;
@@ -152,6 +158,32 @@ namespace HardModePatch
                 noHome.amount = HappinessRules.NoHomeAmount(game[0], booked);
             }
             catch (Exception ex) { Log.Error("Happiness rebalance no-home: " + ex.Message); }
+        }
+
+        // Runs the game's own update when "no home" no longer matches the booking; the update's prefix sets the amount.
+        static void WatchBooking()
+        {
+            try
+            {
+                if (UnityEngine.Time.unscaledTime < nextLook) return;
+                nextLook = UnityEngine.Time.unscaledTime + 1f;
+                var save = SaveGameManager.Current;
+                if (!Rules.HappinessRebalance.Enabled || save == null || save.gameVariables == null || save.gameVariables.disableHappiness) return;
+                var dict = registry.GetValue(null) as Dictionary<string, HappinessModifier>;
+                HappinessModifier noHome;
+                int[] game;
+                if (dict == null || !dict.TryGetValue(HappinessRules.NoHome, out noHome) || ReferenceEquals(noHome, null)
+                    || !gameValues.TryGetValue(HappinessRules.NoHome, out game)) return;
+                bool booked = HotelBooked();
+                if (noHome.amount == HappinessRules.NoHomeAmount(game[0], booked)) return;
+                HappinessHelper.UpdateHappiness();
+                Log.Info("Happiness rebalance: 'no home' is now " + noHome.amount + (booked ? " (hotel room booked)." : " (no hotel room)."));
+            }
+            catch (Exception ex)
+            {
+                UnityLifecycleProvider.OnUpdate -= WatchBooking;
+                Log.Error("Happiness rebalance booking watch stopped: " + ex.Message);
+            }
         }
 
         static bool HotelBooked()

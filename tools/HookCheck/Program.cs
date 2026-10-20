@@ -8,7 +8,7 @@ string repo = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../
 string gameDlls = Path.Combine(repo, "build/game-dlls");
 string patchDll = Path.Combine(repo, "build/HardModePatch/HardModePatch.dll");
 if (args.Length != 1 || !Directory.Exists(args[0])) { Console.Error.WriteLine("Usage: HookCheck <folder with target mod DLLs>"); return 2; }
-var targetDlls = Directory.GetFiles(args[0], "*.dll", SearchOption.AllDirectories)
+var targetDlls = Directory.GetFiles(Path.GetFullPath(args[0]), "*.dll", SearchOption.AllDirectories)
     .GroupBy(Path.GetFileNameWithoutExtension).ToDictionary(g => g.Key, g => g.First());
 // The game's own runtime assemblies stay out: .NET maps mscorlib references to its own core library.
 var skip = new HashSet<string> { "mscorlib", "System", "System.Core", "netstandard" };
