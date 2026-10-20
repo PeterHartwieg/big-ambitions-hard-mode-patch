@@ -1,6 +1,79 @@
 # Plan
 
-A public Workshop mod that rebalances six Workshop mods so they fit a hard, $0-ish, no-new-loans game. Written 8 October 2026 against build 3682. The reviewed mod versions are the hashes in `Core/Targets.cs`. The code reviews behind each patch live in the HART repository (`docs/research/modpack-compatibility-2026-10-07.md` and `docs/research/modpack-review-2026-10-07/`). Nothing here has run in the game yet.
+A public Workshop mod with a standalone indebted start and optional runtime balance patches. Revised 15 October for Peter's RLO-led life-simulation pack: borrowing is allowed subject to realistic debt/leverage balance, and Hardcore Ambitions is dropped from that pack. The six older patches remain available for other configurations. The reviewed target versions are in `Core/Targets.cs`; the original reviews are in the HART repository. Nothing here has run in game.
+
+## Standalone scenario, implemented in 0.2.0
+
+- Explicit option, off by default, selected before creating a new game. The pack enables `scenario_indebted_start=1`. This standalone feature is not an enabled-by-default balance patch; existing installations retain their patch-only behavior.
+- `SaveGameManager.New(GameVariables)` postfix records the choice; `GlobalEvents.InvokeOnGameLoaded()` prefix creates the starting package after bank assets load and before RLO's first reading. Every patched method is listed by `IndebtedScenario.ResolveHooks` and checked offline.
+- $551.37 cash, one native $75,454.35 loan, no loan payout or investment purchases, no difficulty/catalogue mutations. Native bank/calendar/difficulty formulas define the contract; the game and RLO handle later repayments, penalties and debt arrangements.
+- Completion persists after payoff/refinance, so reload cannot reset cash or recreate debt. Untagged saves are never converted. Failure/conflict is recorded and reported rather than retried after play begins.
+- 67 core tests and 24 offline scenario checks pass, including released RLO 0.24.0 and the locally available 0.20.0. The older six-target hook check still passes. Engine lifecycle, real bank assets, Finance UI and midnight/save settlement remain pending.
+- First live run, 18 October: game-loaded also fires when character creation opens, before the city has building registrations, so no bank was found and the save was marked failed. The prefix now waits while there are no registrations and fails only on a loaded city without a bank (`IndebtedStart.ShouldWaitForCity`, 70 tests). Second live run pending.
+- This replaces the need for Hardcore's start in the HART pack. Keep the old optional Hardcore patch unchanged for users of that mod; it still retains that mod's fixed terms. No RLO methods or installed DLLs are patched by the standalone scenario.
+
+## Rent rebalance, implemented in 0.3.0
+
+Peter, 18 October 2026: rent is the lever, not deposits. Option `rent_rebalance`, off by default; the HART pack turns it on.
+
+- For leases the player signs, flats cost twice and every other building type three times the game's market rent (`Core/RentRules`). Deposits keep the game's days per building type, so they rise with the rent. A lease already signed keeps its rent.
+- Hook: postfix `Buildings.Building.GetBuildingDailyMarketRent`. The rent screen, the deposit, BizMan and the rent stored at signing all read it, so what the player sees is what they pay.
+- Rivals: `EstimatedWeeklyIncomeHelper.GetEstimatedWeeklyIncome` subtracts a week of the same market rent. A prefix/finalizer bracket keeps the game's rent while it runs for a business the player neither rents nor owns, so rival survival, the leaderboard and Rival Balance are unchanged.
+- Checks: 78 core tests; 6 offline checks in `ScenarioCheck` (hooks resolve and apply, off/on scaling, the rival estimate exception). Not yet seen in the game.
+- To watch: AI businesses established later store the scaled market rent in their registration (`BuildingRegistration` reset); nothing found charges or estimates rivals from it. Retail Expansion writes its own rent for upgrades and isn't scaled.
+
+## Happiness rebalance, implemented in 0.4.0
+
+Peter, 18 October 2026: home gives at most about 60, long-lasting outside activities the other 40, so a mix of activities beats a routine. Option `happiness_rebalance`, off by default; the HART pack turns it on. Values in `Core/HappinessRules`, extracted vanilla values in the HART research notes.
+
+- **Home, banked:** shower +15 (48 h max); TV, video games, reading, exercise +8 each, banking the game's own hours per hour up to 96 h. 47 in all, plus RLO's small home moods.
+- **Outside, one visit fills the duration:** cinema/theatre +10 (5 days); golf, tennis, casino +10 (7 days); swimming, nightclub, pier party, DJing, dancing in your own club +8 (5 days); park, beach, cemetery walks +5 each (4 days); pier rides +5 (4 days); yacht night +10, boat night +8.
+- **Small:** luxury car night +5, donating +5. While doing an activity, its "-ing" boost counts the same as its result.
+- **No home:** −15 instead of −50 while RLO's `TravelState.HasRoom` says a hotel room is booked. RLO is read by name and never patched; without it −50 stands.
+- **Hooks:** postfix `HappinessHelper.OnHappinessModifiersLoaded` sets absolute values (no compounding on a second load; the game's values are kept and restored when the rule is switched off); prefix `AddModifier` gives an outside result its whole duration; prefix `UpdateHappiness` sets the no-home amount. RLO's own modifier types are never in the list.
+- **Checks:** 89 core tests; 8 offline checks (hooks resolve and apply, values set once, outside grants, home banking, no home in and out of a hotel against RLO 0.35.0). Not yet seen in the game. The tutorial's 60-day "a fresh start" +100 only appears with the tutorial on; the series plays with it off.
+
+## Hitch fixes, implemented in 0.4.1
+
+Peter's exported 18 October trace has recurring ~89 ms frames 1.08 seconds apart during Bakery's Help retry window, and ~111 ms frames 8.01 seconds apart matching Hyperreal's street-light discovery. These are timing/code matches, not yet an A/B result.
+
+- Bakery: replace only its global Help-object discovery with the game's registered singleton (no missing-instance search). Run Bakery's own page insertion before `HelpSystem.LoadCategories`, suppressing its redundant deferred refresh within that call. This also covers first opening after the retry timeout, language changes and Help reloads. Keep its prices and page content in their existing code paths.
+- Hyperreal: seed a light cache once on demand, including inactive lights; update it from HDRP light enable/destroy callbacks, and invalidate on scene load/unload or option changes. Its existing eight-second scan consumes that cache and retains its own lighting/restoration/foliage logic. New inactive lights are discovered when first enabled. Scene transitions still incur an initial discovery; foliage discovery when new street lamps appear remains a possible hitch.
+- Independent default-on options; reviewed Bakery/Hyperreal and game/Unity Core/HGExtensions/HDRP fingerprints required for the applicable performance hooks. Unknown builds keep their original discovery. Log discovery counts, cache activity and measured scan duration without per-frame log spam. City Performance remains the frame-trace recorder for the A/B playtest.
+- 94 core tests, 32 focused offline performance checks, and all seven target hook/contract checks pass. Astra and Sol reviewed; fixed optional Help compatibility so it cannot disable Bakery pricing, including a partial-install rollback, and added a one-time Help population when enabling after the retry timeout. The harness checks both fixes and that the pre-patch delegate reaches patched discovery. In-game Help entries, day/night lights, switching options, save reload and frame-time gains remain playtest checks.
+
+## Planned for 0.5.0: Alcware Seasons follows RLO's calendar
+
+Peter's decision, 17 October: keep both seasonal mods in the HART pack and make Alcware Seasons follow RLO's calendar. Not written yet.
+
+**Why.** The two mods do different jobs. Alcware Seasons draws the season (snow, settled snow, leaves, summer storms, warm outfits, the badge under the date) and changes demand for 27 products through `Item.productSalesRatio`, which reaches rival estimates too. RLO's seasons draw nothing. They drive its heat waves, cold snaps and ice, wholesale supply shocks, travel, property, online sales and summer jobs. Their calendars disagree. In a 60-day year:
+
+| Days | RLO 0.32.0 | Alcware Seasons (15 days a season) |
+| --- | --- | --- |
+| 1–11 | Winter | Spring (1–15) |
+| 12–26 | Spring | Spring to 15, Summer from 16 |
+| 27–41 | Summer | Summer to 30, Autumn from 31 |
+| 42–56 | Autumn | Autumn to 45, Winter from 46 |
+| 57–60 | Winter | Winter |
+
+Only 16 of 60 days agree. Without the patch, Day 1 is spring in the picture and in demand, but a cold snap or ice in RLO.
+
+**Who leads.** RLO. Its calendar scales with the save's year length (`daysPerYear`, 60 to 365) and many RLO systems read it. Alcware's calendar counts fixed-length seasons from Day 1 and has no option to shift them.
+
+**Hook.** Prefix `AlcwareSeasons.SeasonState.Phase(int day)` and return RLO's phase in Alcware's season order (Spring 0, Summer 1, Autumn 2, Winter 3): the season index plus the fraction of that season gone. `CurrentSeason` and `DayOfSeason` derive from `Phase`, so every caller follows: demand (`SeasonController` :1470), snow (:1552), leaves (:594), storms (:1842), surface weather (:2021), clothing (:366) and the badge (:492–504). Line numbers are from the decompile of the installed DLL, hash prefix `d56a88d2c5aff831`, the reviewed version.
+
+**Reading RLO without patching it.** At startup, resolve `RealLifeOverhaul.CalendarRules.Season(int day, int year)` by name with `AccessTools`. It is game-free. Per year length, scan the year once with it and cache each season's first day and length, including winter wrapping over the year's end. That follows RLO's own thresholds through its updates without copying them. No RLO method is patched. If RLO or the method is missing, or the signature has changed, skip this patch, log it and leave Alcware's own calendar.
+
+**Season length option.** The badge reads `[day/DaysPerSeason]`, and `DayOfSeason` scales by that field. RLO's seasons are about a quarter year each: exactly 15 days each in a 60-day year, up to a day off at other lengths. When the save's Seasons length differs from the RLO season it is in, log a warning and show it on the options page: "Set Seasons' length to N days". Don't write Alcware's setting. Changing it re-anchors its calendar and marks the save changed.
+
+**Option.** `seasons_follow_rlo`, on by default, on the Mod Options page. Off restores Alcware's calendar at once, because nothing is saved.
+
+**Checks.**
+- Core rule and tests: the mapping from a season function to Alcware's phase for 8, 60, 61, 120 and 365-day years. Cover winter's wrap, every season boundary, and a phase always in [0, 4).
+- Offline: add Seasons to the hook and fingerprint check. Extend `ScenarioCheck` (or a sibling tool) to load the selected RLO DLL, call its `CalendarRules.Season` and compare the cached table for every year length from 8 to 365.
+- In game, disposable save with both mods: Day 1 shows Winter on the badge and in RLO's weather line in `Player.log`. Skip to Day 12: Spring on both, snow gone, spring demand. Check the badge count and a save and reload.
+
+**Unchanged.** The series goal stays 15 consecutive days at #1 on the leaderboard, an explicit number of days, not "one season".
 
 ## Working assumptions
 

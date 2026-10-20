@@ -53,24 +53,39 @@ namespace HardModePatch
             try { OptionsService.RemoveModOptions(registeredId); }
             catch (Exception) { }
             var options = new ModOptions().AddHeader("hardmode_title");
-            foreach (var target in Rules.All.Select(r => r.Target).Distinct())
+            options.AddSplitter().AddHeader("hardmode_scenario_header");
+            AddRule(options, Rules.IndebtedScenario);
+            if (!IndebtedScenario.Available) options.AddHeader("hardmode_scenario_unavailable");
+            options.AddSplitter().AddHeader("hardmode_rent_header");
+            AddRule(options, Rules.RentRebalance);
+            if (!RentRebalance.Available) options.AddHeader("hardmode_rent_unavailable");
+            options.AddSplitter().AddHeader("hardmode_happiness_header");
+            AddRule(options, Rules.HappinessRebalance);
+            if (!HappinessRebalance.Available) options.AddHeader("hardmode_happiness_unavailable");
+            options.AddSplitter().AddHeader("hardmode_ownerpay_header");
+            AddRule(options, Rules.OwnerJobFullPay);
+            foreach (var target in Rules.All.Where(r => r.Target != null).Select(r => r.Target).Distinct())
             {
                 options.AddSplitter()
                     .AddHeader("hardmode_target_" + target.Key)
                     .AddHeader(StateKey(patcher == null ? TargetState.Missing : patcher.StateOf(target)));
                 foreach (var rule in Rules.All.Where(r => r.Target == target))
                 {
-                    var bound = rule;
-                    options.AddToggle(bound.Id, bound.LabelKey, bound.Default, value =>
-                    {
-                        if (bound.Enabled == value) return;
-                        Log.Info(bound.Id + " turned " + (value ? "on" : "off") + ".");
-                        try { bound.Set(value); }
-                        catch (Exception ex) { Log.Error(bound.Id + ": " + ex); }
-                    });
+                    AddRule(options, rule);
                 }
             }
             OptionsService.Register(registeredId, options);
+        }
+
+        static void AddRule(ModOptions options, Rule rule)
+        {
+            options.AddToggle(rule.Id, rule.LabelKey, rule.Default, value =>
+            {
+                if (rule.Enabled == value) return;
+                Log.Info(rule.Id + " turned " + (value ? "on" : "off") + ".");
+                try { rule.Set(value); }
+                catch (Exception ex) { Log.Error(rule.Id + ": " + ex); }
+            });
         }
 
         static string StateKey(TargetState state)

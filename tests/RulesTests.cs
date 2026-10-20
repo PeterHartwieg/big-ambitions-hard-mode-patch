@@ -7,10 +7,11 @@ using Xunit;
 public class RulesTests
 {
     [Fact]
-    public void RuleIdsAreUniqueAndEveryRuleStartsOnItsHardDefault()
+    public void RuleIdsAreUniqueAndTargetPatchesStartOnTheirHardDefaults()
     {
         Assert.Equal(Rules.All.Count, Rules.All.Select(r => r.Id).Distinct().Count());
-        Assert.All(Rules.All, r => Assert.True(r.Default));
+        Assert.All(Rules.All.Where(r => r.Target != null), r => Assert.True(r.Default));
+        Assert.False(Rules.IndebtedScenario.Default);
     }
 
     [Fact]
@@ -19,8 +20,10 @@ public class RulesTests
         var labels = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, string>>(File.ReadAllText(Path.Combine("Locales", "en.json")))!;
         Assert.All(Rules.All, r => Assert.True(labels.ContainsKey(r.LabelKey), r.LabelKey));
         Assert.True(labels.ContainsKey("hardmode_title"));
-        foreach (var target in Rules.All.Select(r => r.Target).Distinct())
+        foreach (var target in Rules.All.Where(r => r.Target != null).Select(r => r.Target).Distinct())
             Assert.True(labels.ContainsKey("hardmode_target_" + target.Key), target.Key);
+        Assert.True(labels.ContainsKey("hardmode_scenario_header"));
+        Assert.True(labels.ContainsKey("hardmode_scenario_unavailable"));
     }
 
     [Fact]
@@ -47,5 +50,33 @@ public class RuleChangeTests
         Assert.Equal(1, calls);
         Assert.False(last);
         Assert.False(rule.Enabled);
+    }
+}
+
+public class RentRulesTests
+{
+    [Theory]
+    [InlineData("ba:buildingtype_residential", 39, 78)]
+    [InlineData("ba:buildingtype_retail", 34, 102)]
+    [InlineData("ba:buildingtype_office", 1, 3)]
+    [InlineData("ba:buildingtype_retail", 0, 0)]
+    public void FlatsDoubleAndEverythingElseTriples(string type, int market, int expected)
+    {
+        Assert.Equal(expected, RentRules.Scale(market, type));
+    }
+
+    [Theory]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    public void OnlyRivalsKeepTheGameRentInEstimates(bool rented, bool owned, bool keep)
+    {
+        Assert.Equal(keep, RentRules.KeepGameRentInEstimate(rented, owned));
+    }
+
+    [Fact]
+    public void RentRebalanceIsOptInLikeTheScenario()
+    {
+        Assert.False(Rules.RentRebalance.Default);
     }
 }

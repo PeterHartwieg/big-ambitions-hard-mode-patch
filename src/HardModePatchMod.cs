@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using BAModAPI;
 using HarmonyLib;
 
-[assembly: AssemblyVersion("0.1.0.0")]
-[assembly: AssemblyInformationalVersion("0.1.0")]
+[assembly: AssemblyVersion("0.4.1.0")]
+[assembly: AssemblyInformationalVersion("0.4.1")]
 [assembly: RegisterModClass(typeof(HardModePatch.HardModePatchMod))]
 namespace HardModePatch
 {
@@ -15,7 +15,7 @@ namespace HardModePatch
     public sealed class HardModePatchMod : IModBigAmbitions
     {
         public const string HarmonyId = "hardmodepatch";
-        public const string Version = "0.1.0";
+        public const string Version = "0.4.1";
         Patcher patcher;
 
         public string[] RelativeAssetBundlePaths { get { return new string[0]; } }
@@ -25,10 +25,14 @@ namespace HardModePatch
             try
             {
                 Options.Load(context.ModId);
+                IndebtedScenario.Start();
+                RentRebalance.Start();
+                HappinessRebalance.Start();
+                OwnerJobPay.Start();
                 patcher = new Patcher(new Harmony(HarmonyId), new ITargetPatch[]
                 {
                     new HardcoreAmbitionsPatch(), new MeaningfulAmbiencePatch(), new BakeryPatch(),
-                    new InternetCafePatch(), new VendingMachinesPatch(), new EmpireBankPatch()
+                    new InternetCafePatch(), new VendingMachinesPatch(), new EmpireBankPatch(), new HyperrealPatch()
                 });
                 patcher.Start();
                 Options.Register(context.ModId, patcher);
@@ -38,6 +42,10 @@ namespace HardModePatch
             {
                 Log.Error("Not active, every mod runs unchanged: " + ex);
                 if (patcher != null) patcher.Stop();
+                IndebtedScenario.Stop();
+                RentRebalance.Stop();
+                HappinessRebalance.Stop();
+                OwnerJobPay.Stop();
                 patcher = null;
             }
             return Task.FromResult(0);
@@ -47,6 +55,10 @@ namespace HardModePatch
         {
             Options.Unregister();
             if (patcher != null) patcher.Stop();
+            IndebtedScenario.Stop();
+            RentRebalance.Stop();
+            HappinessRebalance.Stop();
+            OwnerJobPay.Stop();
             patcher = null;
             return Task.FromResult(0);
         }
@@ -54,8 +66,9 @@ namespace HardModePatch
 
     static class Log
     {
-        public static void Info(string message) { UnityEngine.Debug.Log("[Hard Mode Patch] " + message); }
-        public static void Warn(string message) { UnityEngine.Debug.LogWarning("[Hard Mode Patch] " + message); }
-        public static void Error(string message) { UnityEngine.Debug.LogError("[Hard Mode Patch] " + message); }
+        // Outside Unity (the offline checks) the engine's log can't be called; the message is dropped there.
+        public static void Info(string message) { try { UnityEngine.Debug.Log("[Hard Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
+        public static void Warn(string message) { try { UnityEngine.Debug.LogWarning("[Hard Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
+        public static void Error(string message) { try { UnityEngine.Debug.LogError("[Hard Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
     }
 }

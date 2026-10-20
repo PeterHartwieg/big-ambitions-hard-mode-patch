@@ -36,6 +36,18 @@ namespace HardModePatch.Core
 
     public static class Rules
     {
+        // Null target: our own optional new-game scenario, not a patch to another author's mod.
+        // Off by default so an existing installation keeps its patch-only behavior. The pack selects it explicitly.
+        public static readonly Rule IndebtedScenario = new Rule("scenario_indebted_start", null, false);
+
+        // Null target: our own rent rebalance (Core/RentRules). Off by default; the HART pack turns it on.
+        public static readonly Rule RentRebalance = new Rule("rent_rebalance", null, false);
+
+        // Null target: our own happiness rebalance (Core/HappinessRules). Off by default; the HART pack turns it on.
+        public static readonly Rule HappinessRebalance = new Rule("happiness_rebalance", null, false);
+        // Ours: RLO's jobs and gigs pay in full to a player who runs businesses (RLO cuts 15% per business).
+        public static readonly Rule OwnerJobFullPay = new Rule("owner_job_full_pay", null, false);
+
         // Hardcore Ambitions: keep the indebted start, drop what fights a custom difficulty.
         public static readonly Rule HardcoreKeepDifficulty = new Rule("hardcore_keep_difficulty", Targets.HardcoreAmbitions, true);
         public static readonly Rule HardcoreNoFunds = new Rule("hardcore_no_funds", Targets.HardcoreAmbitions, true);
@@ -46,6 +58,8 @@ namespace HardModePatch.Core
 
         // Bakery: vanilla bakery margins. Prices are read when the items register, so a change needs a restart.
         public static readonly Rule BakeryVanillaMargins = new Rule("bakery_vanilla_margins", Targets.Bakery, true);
+        public static readonly Rule BakeryHelpDiscovery = new Rule("bakery_help_discovery", Targets.Bakery, true);
+        public static readonly Rule HyperrealLightDiscovery = new Rule("hyperreal_light_discovery", Targets.Hyperreal, true);
 
         // Internet Cafe: off-screen customers limited by the PCs, two 30-minute sessions per PC per hour.
         public static readonly Rule CafePcCapacity = new Rule("cafe_pc_capacity", Targets.InternetCafe, true);
@@ -62,9 +76,14 @@ namespace HardModePatch.Core
 
         public static readonly IList<Rule> All = new[]
         {
+            IndebtedScenario,
+            RentRebalance,
+            HappinessRebalance,
+            OwnerJobFullPay,
             HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave,
             AmbienceScalesWithDemand,
             BakeryVanillaMargins,
+            BakeryHelpDiscovery, HyperrealLightDiscovery,
             CafePcCapacity,
             VendingProtectRivalFurniture,
             BankTaxWithdrawals, BankNoEmergencyBorrowing, BankHonestCreditScores, BankProductLimits, BankNoRemoteRequests

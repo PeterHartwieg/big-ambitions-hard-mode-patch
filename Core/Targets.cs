@@ -28,11 +28,12 @@ namespace HardModePatch.Core
         public static readonly TargetInfo HardcoreAmbitions = new TargetInfo("hardcore", "Hardcore Ambitions", 3809287926, "HardcoreAmbitions", "62ba60cb66dc226c");
         public static readonly TargetInfo MeaningfulAmbience = new TargetInfo("ambience", "Meaningful Ambience", 3810641423, "MeaningfulAmbience", "5564717279c75596");
         public static readonly TargetInfo Bakery = new TargetInfo("bakery", "Bakery", 3810927743, "Bakery", "6d68edab0f5600f5");
+        public static readonly TargetInfo Hyperreal = new TargetInfo("hyperreal", "Hyperreal", 3803756901, "PolyModsHyperreal", "7d1bd589947558e2");
         public static readonly TargetInfo InternetCafe = new TargetInfo("cafe", "Internet Cafe", 3796860957, "InternetCafe", "4fc4ea9bdc455d86");
         public static readonly TargetInfo VendingMachines = new TargetInfo("vending", "Vending Machines", 3812054455, "VendingMachines", "e46197e7ba3933eb");
         public static readonly TargetInfo EmpireBank = new TargetInfo("bank", "Empire Bank", 3781110629, "EmpireBank", "98be6844bcfd5793");
 
-        public static readonly IList<TargetInfo> All = new[] { HardcoreAmbitions, MeaningfulAmbience, Bakery, InternetCafe, VendingMachines, EmpireBank };
+        public static readonly IList<TargetInfo> All = new[] { HardcoreAmbitions, MeaningfulAmbience, Bakery, Hyperreal, InternetCafe, VendingMachines, EmpireBank };
     }
 
     public enum TargetState
