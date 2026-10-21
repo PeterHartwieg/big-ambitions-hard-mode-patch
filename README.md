@@ -37,7 +37,7 @@ With **Home activities bank up to four days…** on (Settings > Mods, off by def
 
 With **Require trade diplomas to buy sewing, kiln and polishing machines** on (off by default), the Factory Supply Depot requires the corresponding garment making, electronics technician or jewelry and goldsmithing diploma. HMP adds these as native RLO school courses: eight four-hour classes, three a week, four homework pieces and an exam; base tuition $3,600, $3,900 and $3,800. Their full-time schedules do not overlap. Already-owned machines keep working; the Laser Cutting Machine and plain consumer-goods workstation have no new restriction.
 
-Requires reviewed RLO 0.41.1 with careers and study enabled. Missing/incompatible RLO or unavailable study leaves purchases unrestricted. Turning HMP's option off keeps diploma progress/results and opens sales; removing HMP makes unmodified RLO safely ignore the extra course records and discard them on its next save. Ordinary courses, skills and student debt remain readable. See [design, hooks, save behavior and playtest](docs/factory-diplomas.md). Offline checks pass; Campus UI, physical school activities, live purchases and actual save/load still need an in-game check.
+Requires reviewed RLO 0.41.1 or 0.45.0 with careers and study enabled. Missing/incompatible RLO or unavailable study leaves purchases unrestricted. Turning HMP's option off keeps diploma progress/results and opens sales; removing HMP makes unmodified RLO safely ignore the extra course records and discard them on its next save. Ordinary courses, skills and student debt remain readable. See [design, hooks, save behavior and playtest](docs/factory-diplomas.md). Offline checks pass; Campus UI, physical school activities, live purchases and actual save/load still need an in-game check.
 
 ## Indebted starting scenario
 
@@ -108,7 +108,7 @@ dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/H
 
 `PerformanceCheck` verifies exact hook application, the single-call transpiler substitutions, original-body preservation, pre-patch delegates, Help refresh scope and enabling on an existing singleton, typed light cache updates, scene/toggle invalidation and unverified-Bakery price fallback. Engine objects are inert test data; no native rendering/UI or real saves are exercised.
 
-`FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1: native course definitions, study/save logic, purchase refusals and fail-safe states, without Unity or a live save.
+`FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1 or 0.45.0: native course definitions, study/save logic, purchase refusals and fail-safe states, without Unity or a live save.
 
 `tools/build.sh` compiles with the SDK's C# compiler against the game's own `mscorlib`, so the package runs on the game's Mono runtime. Harmony 2.4.2 is downloaded and checked against a pinned hash.
 

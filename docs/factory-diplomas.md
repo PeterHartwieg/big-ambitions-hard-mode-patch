@@ -16,7 +16,7 @@ RLO's Electrician diploma is seven four-hour classes, three homework pieces and 
 
 ## Runtime integration
 
-HMP adds `RealLifeOverhaulPatch` to its initialization-time assembly watcher. It requires released RLO **0.41.1**, SHA-256 prefix `f1b93c176b33f79d`, exact reflected member shapes, and the reviewed game purchase-method bodies. Unknown RLO builds are left unrestricted even if their method names still match. No RLO files are modified or referenced at compile time.
+HMP adds `RealLifeOverhaulPatch` to its initialization-time assembly watcher. It requires released RLO **0.41.1** or **0.45.0** (SHA-256 prefixes `f1b93c176b33f79d`, `2f360a365cf7915f`), exact reflected member shapes, and the reviewed game purchase-method bodies. Unknown RLO builds are left unrestricted even if their method names still match. No RLO files are modified or referenced at compile time.
 
 `ResolveHooks` lists all three patched methods plus the RLO methods/constructor used by the bridge. The RLO types are under `RealLifeOverhaul.Careers`:
 
