@@ -124,6 +124,20 @@ public class DiplomaHoldTests
     }
 
     [Fact]
+    public void IdenticalAttemptsAreMatchedOneForOne()
+    {
+        // Two identical withdrawals the same day, held; the line has one copy of it.
+        string twice = DiplomaHold.Keep("v=1~h:1~c:~r:" + Withdrawn19 + ";" + Withdrawn19, null, 31)!;
+        Assert.Equal(2, DiplomaHold.Count(twice));
+        string oneInLine = "v=1~h:1~c:~r:" + Withdrawn19;
+        Assert.Equal(2, DiplomaHold.Count(DiplomaHold.Keep(oneInLine, twice, 40)));
+        var back = DiplomaHold.Restore(oneInLine, twice, 40, 4, 40)!;
+        Assert.True(back.Done);
+        Assert.Equal(2, back.Records);
+        Assert.Equal(2, back.Careers!.Split(';').Count(r => r.EndsWith(Withdrawn19) || r.Contains(Withdrawn19)));
+    }
+
+    [Fact]
     public void RecordsRLONeverRewroteAreMovedOnInPlace()
     {
         string held = DiplomaHold.Keep(Line, null, 31)!;

@@ -165,12 +165,16 @@ namespace HardModePatch.Core
             var ours = Ours(line, today);
             if (ours.Count == 0) return held;
             if (previous != null && previous.Version != line.Version) return held;
-            var heldRecords = HeldIn(previous);
-            var days = new Dictionary<string, int>();
-            foreach (var h in heldRecords) if (!days.ContainsKey(h.Record)) days[h.Record] = h.Day;
-            foreach (var record in ours) { int day; if (days.TryGetValue(record.Record, out day)) record.Day = day; }
-            var inLine = new HashSet<string>(ours.Select(r => r.Record));
-            ours.AddRange(heldRecords.Where(h => !inLine.Contains(h.Record)));
+            // Matched one for one: each record in the line takes one held copy of the same part and text, if any.
+            var unmatched = HeldIn(previous);
+            foreach (var record in ours)
+            {
+                int at = unmatched.FindIndex(h => h.Part == record.Part && h.Record == record.Record);
+                if (at < 0) continue;
+                record.Day = unmatched[at].Day;
+                unmatched.RemoveAt(at);
+            }
+            ours.AddRange(unmatched);
             return Write(line.Version, ours);
         }
 
@@ -254,29 +258,29 @@ namespace HardModePatch.Core
             var line = Parse(careers);
             var hold = Parse(held);
             if (line == null || hold == null || line.Version != hold.Version) return null;
-            var heldRecords = HeldIn(hold);
+            var rest = HeldIn(hold);
             var result = new Restored();
-            var days = new Dictionary<string, int>();
-            foreach (var h in heldRecords) if (!days.ContainsKey(h.Record)) days[h.Record] = h.Day;
-            var inLine = new HashSet<string>(Ours(line, today).Select(r => r.Record));
+            var ids = Ids;
             bool changed = false;
+            // Matched one for one: each of our records in the line takes one held copy of the same part and text.
             foreach (char letter in Parts)
             {
                 var records = line.Records(letter);
                 if (records == null) continue;
                 for (int i = 0; i < records.Count; i++)
                 {
-                    int day;
-                    if (!inLine.Contains(records[i]) || !days.TryGetValue(records[i], out day)) continue;
                     var record = FromLine(letter, records[i], today);
-                    Pause(record, today - day);
+                    if (!ids.Contains(record.Id)) continue;
+                    int at = rest.FindIndex(h => h.Part == letter && h.Record == records[i]);
+                    if (at < 0) continue;
+                    Pause(record, today - rest[at].Day);
+                    rest.RemoveAt(at);
                     result.Records++;
                     if (record.Record == records[i]) continue;
                     records[i] = record.Record;
                     changed = true;
                 }
             }
-            var rest = heldRecords.Where(h => !inLine.Contains(h.Record)).ToList();
             result.Waiting = NoRoom(line, rest, liveMost, resultsMost);
             if (result.Waiting == null)
             {
