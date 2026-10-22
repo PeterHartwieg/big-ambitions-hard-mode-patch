@@ -1,5 +1,7 @@
 # Hyperreal darkness after the map — 19 October 2026
 
+Current ownership, 22 October: HMP 0.4.2 retains the map-return workaround and its exact binary guards, with five remaining method contracts. Lamp discovery now belongs to City Performance. The 0.4.1 cache and 49-check results below are historical diagnosis evidence. Current regression coverage is `tools/CompatibilityCheck`; see [the paired handoff](performance-ownership.md).
+
 The most plausible explanation is Hyperreal's return from Fixed exposure to AutomaticHistogram without invalidating HDRP exposure history. **Confidence: moderate; this is a diagnosis to test, not a proven root cause.** The log does not mark the black screen or record GPU exposure/history at the time. Two independent code reviews found no stronger deterministic fault.
 
 HMP 0.4.1's light-discovery patch is **ruled out for the proposed map-disable/stale-list mechanism**. This is a strong code conclusion, not an in-game HMP-off comparison. Its optimization is unchanged by this fix.

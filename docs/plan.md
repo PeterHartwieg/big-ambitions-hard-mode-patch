@@ -2,6 +2,12 @@
 
 A public Workshop mod with a standalone indebted start and optional runtime balance patches. Revised 15 October for Peter's RLO-led life-simulation pack: borrowing is allowed subject to realistic debt/leverage balance, and Hardcore Ambitions is dropped from that pack. The six older patches remain available for other configurations. The reviewed target versions are in `Core/Targets.cs`; the original reviews are in the HART repository. In-game validation is partial; each section records its limits.
 
+## Ownership split, 22 October 2026 (0.4.2 candidate)
+
+Peter: performance belongs to City Performance; HMP ensures mods work together and implements the intended pack mechanics. The paired HMP 0.4.2 / CP 0.4.4 candidate moves the entire coupled Bakery Help feature to CP and removes HMP's old Hyperreal lamp cache. CP's reviewed full unsorted lamp query replaces that algorithm; it requires a new native comparison. HMP retains price rules and all map-return lifecycle hooks. Old performance keys remain inert for downgrade, and CP refuses legacy overlapping hooks in either load order. See [handoff, settings and validation](performance-ownership.md). No installation is implied.
+
+The dated 0.4.1 sections below describe the previous implementation and historical checks; they are not current feature ownership or release instructions.
+
 ## Standalone scenario, implemented in 0.2.0
 
 - Explicit option, off by default, selected before creating a new game. The pack enables `scenario_indebted_start=1`. This standalone feature is not an enabled-by-default balance patch; existing installations retain their patch-only behavior.
@@ -33,7 +39,7 @@ Peter, 18 October 2026: home gives at most about 60, long-lasting outside activi
 - **Hooks:** postfix `HappinessHelper.OnHappinessModifiersLoaded` sets absolute values (no compounding on a second load; the game's values are kept and restored when the rule is switched off); prefix `AddModifier` gives an outside result its whole duration; prefix `UpdateHappiness` sets the no-home amount. RLO's own modifier types are never in the list.
 - **Checks:** 89 core tests; 8 offline checks (hooks resolve and apply, values set once, outside grants, home banking, no home in and out of a hotel against RLO 0.35.0). Not yet seen in the game. The tutorial's 60-day "a fresh start" +100 only appears with the tutorial on; the series plays with it off.
 
-## Hitch fixes, implemented in 0.4.1
+## Historical hitch fixes in 0.4.1 (removed/moved in 0.4.2)
 
 Peter's exported 18 October trace has recurring ~89 ms frames 1.08 seconds apart during Bakery's Help retry window, and ~111 ms frames 8.01 seconds apart matching Hyperreal's street-light discovery. These are timing/code matches, not yet an A/B result.
 

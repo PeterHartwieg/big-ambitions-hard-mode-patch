@@ -65,8 +65,6 @@ namespace HardModePatch.Core
 
         // Bakery: vanilla bakery margins. Prices are read when the items register, so a change needs a restart.
         public static readonly Rule BakeryVanillaMargins = new Rule("bakery_vanilla_margins", Targets.Bakery, true);
-        public static readonly Rule BakeryHelpDiscovery = new Rule("bakery_help_discovery", Targets.Bakery, true);
-        public static readonly Rule HyperrealLightDiscovery = new Rule("hyperreal_light_discovery", Targets.Hyperreal, true);
         public static readonly Rule HyperrealMapReturnFix = new Rule("hyperreal_map_return_fix", Targets.Hyperreal, true);
 
         // Internet Cafe: off-screen customers limited by the PCs, two 30-minute sessions per PC per hour.
@@ -91,7 +89,7 @@ namespace HardModePatch.Core
             HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave,
             AmbienceScalesWithDemand,
             BakeryVanillaMargins,
-            BakeryHelpDiscovery, HyperrealLightDiscovery, HyperrealMapReturnFix,
+            HyperrealMapReturnFix,
             CafePcCapacity,
             VendingProtectRivalFurniture,
             BankTaxWithdrawals, BankNoEmergencyBorrowing, BankHonestCreditScores, BankProductLimits, BankNoRemoteRequests

@@ -16,6 +16,14 @@ public class RulesTests
     }
 
     [Fact]
+    public void PerformanceOptionsAreNotOwnedByHardModePatch()
+    {
+        Assert.DoesNotContain(Rules.All, r => r.Id == "bakery_help_discovery" || r.Id == "hyperreal_light_discovery");
+        Assert.Contains(Rules.All, r => r.Id == "bakery_vanilla_margins");
+        Assert.Contains(Rules.All, r => r.Id == "hyperreal_map_return_fix");
+    }
+
+    [Fact]
     public void EveryRuleAndTargetHasAnEnglishLabel()
     {
         var labels = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, string>>(File.ReadAllText(Path.Combine("Locales", "en.json")))!;

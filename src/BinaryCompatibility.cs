@@ -6,12 +6,10 @@ using HardModePatch.Core;
 
 namespace HardModePatch
 {
-    // These optimizations depend on engine lifecycle semantics, beyond the existing balance patches'
-    // signature contracts. Fail open to the authors' discovery on a different or unreadable binary.
-    public static class PerformanceCompatibility
+    // The map-return compatibility workaround requires the reviewed engine and mod binaries.
+    public static class BinaryCompatibility
     {
         public const string GameHash = "9427561b81aaab2a";
-        public const string ExtensionsHash = "fafddfadf7aca598";
         public const string HdrpHash = "d0f8693039963881";
         public const string UnityCoreHash = "5afc743d350e95dc";
 

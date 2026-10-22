@@ -4,28 +4,21 @@ Formerly Hard Mode Patch. The DLL, the mod folder and the option IDs keep the ol
 
 A Big Ambitions mod with an optional indebted starting scenario and runtime balance patches for other Workshop mods. Every change has an option under Settings > Mods. The scenario is off by default; with it off and no target mod installed, this changes nothing.
 
-**Status:** version 0.4.1, built against game build 3682. Includes discovery optimizations, the starting scenario, rent/happiness rebalances and opt-in advanced factory diplomas. Offline checks pass: 108 core cases, 57 factory checks, 38 scenario/rebalance checks against RLO 0.41.1 and 49 performance checks. Hook/contract checks pass for the five locally available target DLLs; Hardcore Ambitions, Empire Bank and Vending Machines were unavailable for this run. Live Campus/depot behavior, the map-return workaround and frame-time improvements still need playtests.
+**Status:** 0.4.2 candidate, paired with City Performance 0.4.4. HART. Mode Patch owns mod compatibility and the intended modpack mechanics: prices, scenario, rent, happiness, running costs, factory diplomas and Hyperreal map return. City Performance owns performance changes. This candidate has not been installed or playtested. See [the ownership handoff](docs/performance-ownership.md) for configuration, mixed-version behavior and validation limits.
 
-## Recurring hitch fixes
+## Performance ownership
 
-Two independent switches are on by default under Settings > Mods > HART. Mode Patch:
+Bakery's Help discovery and pre-build page insertion have moved to City Performance. Hyperreal's former lamp cache and its enable/destroy hooks are removed; City Performance supplies fresh inactive-inclusive discovery with sorting disabled. These are different algorithms: the fresh query includes newly created inactive lamps on the next scheduled scan, but does not preserve the old cache-hit cost. Native performance must be compared before installation for recording.
 
-- **Avoid repeated Help searches:** Bakery's retries use the game's registered Help instance instead of scanning all loaded objects once a second. Bakery adds its own pages before the game builds Help, including opening it after Bakery's retry timeout and after a language change. Enabling the option also populates an already initialized Help menu. Turning it off restores Bakery's original discovery; entries already added remain until Help reloads.
-- **Cache street-light discovery:** Hyperreal seeds its light list once per scene state, then uses light enable/destroy callbacks to update it. Its eight-second scan reuses this list, including while Hyperreal's enhancements are off. Disabled lights remain tracked; newly created inactive lights enter when first enabled. Scene changes and option toggles clear the cache. Hyperreal retains its lighting values, restoration and foliage classification.
-
-These address the repeating ~1-second and ~8-second hitches correlated with Peter's 18 October trace. Improvement is not measured yet. Initial scene discovery and foliage checks when new street lamps appear can still hitch; this does not eliminate every source of stutter.
-
-Performance hooks require the reviewed Bakery `6d68edab0f5600f5` / Hyperreal `7d1bd589947558e2` binaries and their audited game/Unity dependencies. Unknown or unreadable binaries retain original discovery. Bakery's existing price patch remains independently available. Check `[HART. Mode Patch]` lines in `Player.log` for activation, cached lookups, global searches, scene invalidations and Hyperreal scan timings. Logs are aggregated (roughly once a minute while discovery is running, plus lifecycle/toggle messages); use City Performance's exported trace for actual frame times.
-
-For the next playtest, compare the same route with each switch on/off, then check Bakery Help after waiting over two minutes, toggling the option and changing language, plus street lights at night and after reloading a save. In-game validation is pending.
+The old `bakery_help_discovery` and `hyperreal_light_discovery` options are no longer registered by HMP. Existing preference values are left untouched for downgrade. Configure the new City Performance options explicitly when upgrading; old values are not imported automatically. Without an active compatible performance feature, the target mod uses its original discovery.
 
 ## Hyperreal map-return workaround (awaiting playtest)
 
-**Reset Hyperreal exposure history after returning from the city map** (`hyperreal_map_return_fix`, on by default) requests one HDRP postprocessing-history reset after the game's camera return and Hyperreal's closing fade both finish. It acts only outdoors when Hyperreal has resumed Automatic Histogram exposure, on the camera Hyperreal supplied that frame. Fixed exposure and indoor returns are left alone. The lamp-discovery switch is independent.
+**Reset Hyperreal exposure history after returning from the city map** (`hyperreal_map_return_fix`, on by default) requests one HDRP postprocessing-history reset after the game's camera return and Hyperreal's closing fade both finish. It acts only outdoors when Hyperreal has resumed Automatic Histogram exposure, on the camera Hyperreal supplied that frame. Fixed exposure and indoor returns are left alone. This compatibility feature is independent of City Performance and does not require any lamp-discovery hook.
 
-This addresses the leading hypothesis for Peter's 19 October report of darkness after leaving the map. The supplied log cannot identify the black frame, so symptom resolution is **unverified**. The original lamp cache does not change exposure or drop disabled lamps. See [the diagnosis and test procedure](docs/hyperreal-map-return.md) for ranked evidence and remaining alternatives.
+This addresses the leading hypothesis for Peter's 19 October report of darkness after leaving the map. The supplied log cannot identify the black frame, so symptom resolution is **unverified**. The historical lamp cache did not change exposure or drop disabled lamps. See [the diagnosis and test procedure](docs/hyperreal-map-return.md) for ranked evidence and remaining alternatives.
 
-The workaround requires the same reviewed Hyperreal/game/Unity/HDRP binaries as discovery. Unknown binaries leave Hyperreal unpatched. `Player.log` records `Hyperreal map return: reset exposure history...` once when it acts. Loading another save restores the map-close subscription; scene changes, game-event initialization, Hyperreal reset and option changes cancel pending returns. Version remains 0.4.1 for Peter to choose the release number.
+The workaround retains its exact reviewed Hyperreal/game/Unity/HDRP binary requirements. Unknown binaries leave Hyperreal unpatched. `Player.log` records `Hyperreal map return: reset exposure history...` once when it acts. Loading another save restores the map-close subscription; scene changes, game-event initialization, Hyperreal reset and option changes cancel pending returns.
 
 ## Rent rebalance
 
@@ -110,7 +103,7 @@ tools/build.sh
 dotnet test tests/HardModePatch.Core.Tests.csproj
 tools/check-hooks.sh <folder holding the target mods' DLLs>
 dotnet run --project tools/ScenarioCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
-dotnet run --project tools/PerformanceCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <folder containing Bakery.dll and PolyModsHyperreal.dll>
+dotnet run --project tools/CompatibilityCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <folder containing Bakery.dll and PolyModsHyperreal.dll>
 dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 dotnet run --project tools/CostCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 ```
@@ -119,7 +112,7 @@ dotnet run --project tools/CostCheck -- build/game-dlls build/HardModePatch/Hard
 
 `ScenarioCheck` exercises the standalone scenario against native data containers and optionally the selected RLO DLL's game-free loan tracking/holds. It does not launch Unity, read a save or execute nightly game settlement. Its bank settings are illustrative, not extracted real-bank assets. Omit the final DLL argument for scenario-only checks.
 
-`PerformanceCheck` verifies exact hook application, the single-call transpiler substitutions, original-body preservation, pre-patch delegates, Help refresh scope and enabling on an existing singleton, typed light cache updates, scene/toggle invalidation and unverified-Bakery price fallback. Engine objects are inert test data; no native rendering/UI or real saves are exercised.
+`CompatibilityCheck` verifies price-only Bakery behavior and original-price restoration, exact map-return hooks, camera/fade completion, exposure eligibility, scene/reset/reload cleanup and unreadable binary refusal. It also asserts that HMP no longer owns Help, Scan or lamp lifecycle hooks. City Performance's `OwnershipCheck` covers the moved Help behavior and actual old/new HMP coexistence in both load orders. Engine objects are inert test data; no native rendering/UI or real saves are exercised.
 
 `FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1 or 0.45.0: native course definitions, study/save logic, purchase refusals and fail-safe states, without Unity or a live save.
 
