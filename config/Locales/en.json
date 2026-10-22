@@ -1,5 +1,5 @@
 {
-  "hardmode_title": "Hard Mode Patch",
+  "hardmode_title": "HART. Mode Patch",
   "hardmode_scenario_header": "Starting scenario (new games only)",
   "hardmode_scenario_indebted_start": "Start a new game with $551 cash and a $75,454 loan (disable Hardcore Ambitions)",
   "hardmode_scenario_unavailable": "Starting scenario unavailable: game methods changed; see Player.log",
@@ -42,7 +42,7 @@
   "hardmode_bank_honest_credit_scores": "A minimum credit score doesn't raise applicants' scores",
   "hardmode_bank_product_limits": "Cap loan APR at 15%, fees at 3%, card APR at 30%; loans of 6 months or more",
   "hardmode_bank_no_remote_requests": "No requests to the author's servers",
-  "hardmode_bank_emergency_blocked": "Emergency borrowing is off (Hard Mode Patch)",
+  "hardmode_bank_emergency_blocked": "Emergency borrowing is off (HART. Mode Patch)",
   "hardmode_target_rlo": "Real Life Overhaul: advanced factories",
   "hardmode_factory_diplomas": "Require trade diplomas to buy sewing, kiln and polishing machines (eight classes and an exam at the school)",
   "reallife_study_course_hmp_garment_making": "Garment making diploma",

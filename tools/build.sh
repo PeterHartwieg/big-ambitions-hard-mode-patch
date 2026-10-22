@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the Hard Mode Patch package with the .NET SDK's C# compiler against the game's own assemblies.
+# Builds the HART. Mode Patch package with the .NET SDK's C# compiler against the game's own assemblies.
 # Usage: tools/build.sh   Output: build/HardModePatch/ (the folder that goes into the game's ModsLocal).
 # Needs build/game-dlls from tools/fetch-game-dlls.sh. The game's DLLs and Harmony are never committed.
 set -euo pipefail

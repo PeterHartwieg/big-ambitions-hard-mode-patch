@@ -71,8 +71,8 @@ namespace HardModePatch
     static class Log
     {
         // Outside Unity (the offline checks) the engine's log can't be called; the message is dropped there.
-        public static void Info(string message) { try { UnityEngine.Debug.Log("[Hard Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
-        public static void Warn(string message) { try { UnityEngine.Debug.LogWarning("[Hard Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
-        public static void Error(string message) { try { UnityEngine.Debug.LogError("[Hard Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
+        public static void Info(string message) { try { UnityEngine.Debug.Log("[HART. Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
+        public static void Warn(string message) { try { UnityEngine.Debug.LogWarning("[HART. Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
+        public static void Error(string message) { try { UnityEngine.Debug.LogError("[HART. Mode Patch] " + message); } catch (System.Security.SecurityException) { } }
     }
 }

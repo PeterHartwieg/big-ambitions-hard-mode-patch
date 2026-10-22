@@ -1,6 +1,6 @@
 # Advanced factory diplomas
 
-`factory_diplomas` is off by default under Settings > Mods > Hard Mode Patch > Real Life Overhaul: advanced factories. Enable it for diploma requirements on new machine purchases. Machines already owned keep working. The Laser Cutting Machine and Consumer Goods Assembly Machine have no new requirement; the game's own manufacturing course is unchanged.
+`factory_diplomas` is off by default under Settings > Mods > HART. Mode Patch > Real Life Overhaul: advanced factories. Enable it for diploma requirements on new machine purchases. Machines already owned keep working. The Laser Cutting Machine and Consumer Goods Assembly Machine have no new requirement; the game's own manufacturing course is unchanged.
 
 ## Courses
 
@@ -35,7 +35,7 @@ The checkout goes through `CashRegisterController.OnPlaceOrder` and eventually `
 
 ## Fail-safe and saves
 
-The gate requires the option, intact injection, RLO careers and study options, an unfaulted director and a live study record. Missing RLO, a changed shape/binary, occupied id, late injection, lost catalogue, stopped study or reflection failure leaves sales unrestricted. Each runtime reason is logged once under `[Hard Mode Patch]`; compatibility/install failures use HMP's existing one-time target status/log path. A reflection failure latches the gate off for the session. Option and RLO-setting changes are read at each purchase; dependency recovery does not require restarting unless installation itself failed or the bridge faulted.
+The gate requires the option, intact injection, RLO careers and study options, an unfaulted director and a live study record. Missing RLO, a changed shape/binary, occupied id, late injection, lost catalogue, stopped study or reflection failure leaves sales unrestricted. Each runtime reason is logged once under `[HART. Mode Patch]`; compatibility/install failures use HMP's existing one-time target status/log path. A reflection failure latches the gate off for the session. Option and RLO-setting changes are read at each purchase; dependency recovery does not require restarting unless installation itself failed or the bridge faulted.
 
 RLO's `CareersStore` serializes courses and results by id under `reallife:careers`. Its reader resolves an enrolment through `StudyCatalogue.Find`, so injection precedes save reading. The ordinary course/result/fee format, student debt and save version are unchanged.
 

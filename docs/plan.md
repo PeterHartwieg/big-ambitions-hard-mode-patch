@@ -104,7 +104,7 @@ Only 16 of 60 days agree. Without the patch, Day 1 is spring in the picture and 
 
 ## Working assumptions
 
-- **Name:** working title "Hard Mode Patch". This repository, MIT. Built with the .NET SDK's C# compiler against the game's own assemblies (`tools/build.sh`), Harmony 2.4.2 in `Dependencies\`.
+- **Name:** working title "HART. Mode Patch". This repository, MIT. Built with the .NET SDK's C# compiler against the game's own assemblies (`tools/build.sh`), Harmony 2.4.2 in `Dependencies\`.
 - **One patch per target mod, found at runtime.** The patch never references the target DLLs at compile time; it finds their types by name with `AccessTools.TypeByName`, so a viewer missing a target mod loses only that patch.
 - **Two levels of trust.** A target whose DLL hash matches a reviewed version is *verified*. A new hash whose hooked methods all still exist with the same signatures is *unverified*: the patch applies, logs a warning and shows the mod as unverified on the options page. A missing method or changed signature skips that target and says so. Target authors update on their own schedule and the Workshop can't pin versions, so this keeps viewers balanced while a new version is reviewed.
 - **Every rule has an option** on a native Mod Options page, defaulting to the hard values below, so viewers can turn single rules off.

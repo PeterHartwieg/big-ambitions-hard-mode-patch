@@ -1,4 +1,6 @@
-# Hard Mode Patch
+# HART. Mode Patch
+
+Formerly Hard Mode Patch. The DLL, the mod folder and the option IDs keep the old `HardModePatch` name, so installed settings and saves carry over.
 
 A Big Ambitions mod with an optional indebted starting scenario and runtime balance patches for other Workshop mods. Every change has an option under Settings > Mods. The scenario is off by default; with it off and no target mod installed, this changes nothing.
 
@@ -6,14 +8,14 @@ A Big Ambitions mod with an optional indebted starting scenario and runtime bala
 
 ## Recurring hitch fixes
 
-Two independent switches are on by default under Settings > Mods > Hard Mode Patch:
+Two independent switches are on by default under Settings > Mods > HART. Mode Patch:
 
 - **Avoid repeated Help searches:** Bakery's retries use the game's registered Help instance instead of scanning all loaded objects once a second. Bakery adds its own pages before the game builds Help, including opening it after Bakery's retry timeout and after a language change. Enabling the option also populates an already initialized Help menu. Turning it off restores Bakery's original discovery; entries already added remain until Help reloads.
 - **Cache street-light discovery:** Hyperreal seeds its light list once per scene state, then uses light enable/destroy callbacks to update it. Its eight-second scan reuses this list, including while Hyperreal's enhancements are off. Disabled lights remain tracked; newly created inactive lights enter when first enabled. Scene changes and option toggles clear the cache. Hyperreal retains its lighting values, restoration and foliage classification.
 
 These address the repeating ~1-second and ~8-second hitches correlated with Peter's 18 October trace. Improvement is not measured yet. Initial scene discovery and foliage checks when new street lamps appear can still hitch; this does not eliminate every source of stutter.
 
-Performance hooks require the reviewed Bakery `6d68edab0f5600f5` / Hyperreal `7d1bd589947558e2` binaries and their audited game/Unity dependencies. Unknown or unreadable binaries retain original discovery. Bakery's existing price patch remains independently available. Check `[Hard Mode Patch]` lines in `Player.log` for activation, cached lookups, global searches, scene invalidations and Hyperreal scan timings. Logs are aggregated (roughly once a minute while discovery is running, plus lifecycle/toggle messages); use City Performance's exported trace for actual frame times.
+Performance hooks require the reviewed Bakery `6d68edab0f5600f5` / Hyperreal `7d1bd589947558e2` binaries and their audited game/Unity dependencies. Unknown or unreadable binaries retain original discovery. Bakery's existing price patch remains independently available. Check `[HART. Mode Patch]` lines in `Player.log` for activation, cached lookups, global searches, scene invalidations and Hyperreal scan timings. Logs are aggregated (roughly once a minute while discovery is running, plus lifecycle/toggle messages); use City Performance's exported trace for actual frame times.
 
 For the next playtest, compare the same route with each switch on/off, then check Bakery Help after waiting over two minutes, toggling the option and changing language, plus street lights at night and after reloading a save. In-game validation is pending.
 
@@ -90,7 +92,7 @@ Each patched mod updates on its own schedule, and this patch can't control that.
 - **Patched (new version, not yet reviewed):** the DLL is new, but every method the patch hooks is still there with the same signature, and every method body the patch skips or replaces is unchanged instruction for instruction. It is patched, and `Player.log` carries a warning.
 - **Not patched:** a hooked method is gone or changed, or a body the patch replaces was rewritten. That mod runs exactly as its author published it until this patch is updated.
 
-The state of each mod shows on the options page and in `Player.log` on lines starting `[Hard Mode Patch]`.
+The state of each mod shows on the options page and in `Player.log` on lines starting `[HART. Mode Patch]`.
 
 ## Install
 
