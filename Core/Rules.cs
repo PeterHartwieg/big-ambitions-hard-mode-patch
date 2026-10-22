@@ -52,6 +52,10 @@ namespace HardModePatch.Core
         public static readonly Rule EquipmentUtilities = new Rule("equipment_utilities", null, false);
         public static readonly Rule OfficeIt = new Rule("office_it", null, false);
 
+        // Null target: the custom game screen opens with the HART series values (Core/SeriesSettings.NewGame). On by
+        // default: it only fills in the screen, and the player can change every value before starting.
+        public static readonly Rule SeriesPrefill = new Rule("series_prefill_custom_game", null, true);
+
         // The series opts into RLO school diplomas for advanced factory machine purchases.
         public static readonly Rule FactoryDiplomas = new Rule("factory_diplomas", Targets.RealLifeOverhaul, false);
 
@@ -82,6 +86,7 @@ namespace HardModePatch.Core
 
         public static readonly IList<Rule> All = new[]
         {
+            SeriesPrefill,
             IndebtedScenario,
             RentRebalance,
             HappinessRebalance,

@@ -53,6 +53,10 @@ namespace HardModePatch
             try { OptionsService.RemoveModOptions(registeredId); }
             catch (Exception) { }
             var options = new ModOptions().AddHeader("hardmode_title");
+            options.AddSplitter().AddHeader("hardmode_series_header");
+            options.AddButton("hardmode_series_apply", SeriesSettingsButton.Apply);
+            AddRule(options, Rules.SeriesPrefill);
+            if (!CustomGamePrefill.Available) options.AddHeader("hardmode_series_prefill_unavailable");
             options.AddSplitter().AddHeader("hardmode_scenario_header");
             AddRule(options, Rules.IndebtedScenario);
             if (!IndebtedScenario.Available) options.AddHeader("hardmode_scenario_unavailable");

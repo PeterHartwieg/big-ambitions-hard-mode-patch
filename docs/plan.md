@@ -170,3 +170,7 @@ Margins per unit close to the vanilla bakery and coffee items (croissant $4.29, 
 ## RLO 0.49.0 and the review gate, 22 October 2026
 
 The Workshop serves RLO 0.49.0, and viewers get RLO updates automatically. Reviewed and accepted 0.49.0 (`4f82b4f88f919178`); the member-by-member review is in [RLO compatibility](rlo-compatibility.md). Every RLO feature (factory diplomas, running costs, owner job pay, the hotel "no home" rule) now runs only on a reviewed RLO build: `src/RloGate.cs` decides once per assembly, logs one line, shows one notice on save load and holds a save's diploma records (`Core/DiplomaHold`) until a reviewed build is back. Running costs and owner job pay were name-gated before; they are hash-gated now. Checks: 139 core tests, FactoryCheck 63, RloGateCheck 16, CostCheck 21, ScenarioCheck 38 against 0.49.0. Not run in the game.
+
+## Series settings, 22 October 2026
+
+Peter: HMP owns all modpack changes, including the series settings. A button "Apply HART series settings" writes 74 listed Mod Options values (HMP's own rules, Rival Balance's `rival_preset`, Dynamic Rivals, RLO) the way the game's option controls do, logs each change and skips what it can't find; a default-on toggle prefills the custom game screen. The values, sources, omissions and limits are in [series settings](series-settings.md). `tools/export-series-settings.ps1` dumps the series PC's values for comparison. Checks: 150 core tests, SettingsCheck 26. Not run in the game.

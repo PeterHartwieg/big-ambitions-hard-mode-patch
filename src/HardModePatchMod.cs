@@ -26,6 +26,7 @@ namespace HardModePatch
             {
                 Options.Load(context.ModId);
                 RloGate.Start();
+                CustomGamePrefill.Start();
                 IndebtedScenario.Start();
                 RentRebalance.Start();
                 HappinessRebalance.Start();
@@ -46,6 +47,7 @@ namespace HardModePatch
                 Log.Error("Not active, every mod runs unchanged: " + ex);
                 if (patcher != null) patcher.Stop();
                 RloGate.Stop();
+                CustomGamePrefill.Stop();
                 IndebtedScenario.Stop();
                 RentRebalance.Stop();
                 HappinessRebalance.Stop();
@@ -61,6 +63,7 @@ namespace HardModePatch
             Options.Unregister();
             if (patcher != null) patcher.Stop();
             RloGate.Stop();
+            CustomGamePrefill.Stop();
             IndebtedScenario.Stop();
             RentRebalance.Stop();
             HappinessRebalance.Stop();

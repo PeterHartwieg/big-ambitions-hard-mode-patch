@@ -1,5 +1,11 @@
 {
   "hardmode_title": "HART. Mode Patch",
+  "hardmode_series_header": "HART series settings",
+  "hardmode_series_apply": "Apply HART series settings",
+  "hardmode_series_prefill_custom_game": "Prefill the custom game with the series settings",
+  "hardmode_series_prefill_unavailable": "Custom game prefill unavailable: the game's custom game screen changed; see Player.log",
+  "hardmode_series_applied": "HART series settings applied. Restart the game to use them.",
+  "hardmode_series_applied_partial": "HART series settings applied, but some mods or options weren't found. Player.log lists them. Restart the game to use the rest.",
   "hardmode_scenario_header": "Starting scenario (new games only)",
   "hardmode_scenario_indebted_start": "Start a new game with $551 cash and a $75,454 loan (disable Hardcore Ambitions)",
   "hardmode_scenario_unavailable": "Starting scenario unavailable: game methods changed; see Player.log",
