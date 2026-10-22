@@ -119,17 +119,21 @@ namespace HardModePatch
             if (held == null) return false;
             var settled = DiplomaHold.Restore(line, held, game.Day, Limit(rlo, "RealLifeOverhaul.Careers.StudyRules", "LiveMost", 4),
                 Limit(rlo, "RealLifeOverhaul.Careers.StudyFile", "ResultsMost", 40));
-            if (settled == null || !settled.Done)
+            if (settled == null)
             {
-                Log.Warn("Factory diplomas: held diploma records can't be given back yet ("
-                    + (settled == null ? "no careers record in this save, or another format" : settled.Waiting) + "); they stay held.");
+                Log.Warn("Factory diplomas: held diploma records can't be given back yet (no careers record in this save, or another format); they stay held.");
                 return false;
             }
             if (settled.Careers != null) data[DiplomaHold.CareersKey] = settled.Careers;
-            data.Remove(DiplomaHold.HoldKey);
-            if (settled.Superseded > 0)
-                Log.Warn("Factory diplomas: " + settled.Superseded + " held record(s) replaced by Real Life Overhaul's newer records of the same courses.");
-            Log.Info("Factory diplomas: held diploma records settled; " + settled.Records + " record(s) given back or moved on by the weeks they were held. The hold is cleared.");
+            if (settled.Done)
+            {
+                data.Remove(DiplomaHold.HoldKey);
+                Log.Info("Factory diplomas: held diploma records settled; " + settled.Records + " record(s) given back or moved on by the weeks they were held. The hold is cleared.");
+                return true;
+            }
+            data[DiplomaHold.HoldKey] = settled.Hold;
+            Log.Warn("Factory diplomas: " + DiplomaHold.Count(settled.Hold) + " held diploma record(s) can't be given back yet (" + settled.Waiting + "); they stay held"
+                + (settled.Records > 0 ? ", and " + settled.Records + " record(s) still in RLO's line were moved on" : "") + ".");
             return true;
         }
 

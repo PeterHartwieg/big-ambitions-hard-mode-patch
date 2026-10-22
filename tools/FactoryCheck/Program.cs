@@ -309,6 +309,16 @@ try
     string crowded = (string)Rlo("CareersStore", "Write", Results(39)[0]);
     Check(Settle(crowded, attemptsHeld, 20) == crowded && modData["hardmodepatch:factory_diplomas_held"] == attemptsHeld,
         "39 results and three held attempts, two on the same day: nothing given back, the hold waits unchanged");
+    // While the hold waits, the player enrols in another HMP course and RLO saves it: the held attempts stay.
+    var enrolled = Results(39)[0];
+    var fresh = Activator.CreateInstance(T("Enrolment"));
+    Set(fresh, "Course", 19); Set(fresh, "Start", 21);
+    ((IList)Get(enrolled, "Courses")).Add(fresh);
+    string withNew = (string)Rlo("CareersStore", "Write", enrolled);
+    Check(Settle(withNew, attemptsHeld, 22) == withNew && HoldCount(modData["hardmodepatch:factory_diplomas_held"]) == 3,
+        "a new HMP enrolment while the hold waits: the line is left alone and all three held attempts stay");
+    string keptUnreviewed = Keep(withNew, attemptsHeld, 23);
+    Check(HoldCount(keptUnreviewed) == 4, "the same save under an unreviewed RLO: the hold keeps the three attempts and adds the new course");
     var roomy = Read(Settle((string)Rlo("CareersStore", "Write", Results(37)[0]), attemptsHeld, 20));
     Check(((IList)Get(roomy, "Results")).Count == 40 && (bool)roomy.GetType().GetMethod("Holds").Invoke(roomy, new object[] { 18 })
         && !modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "with room for all three, RLO keeps every attempt and the hold is cleared");

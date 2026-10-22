@@ -154,9 +154,10 @@ namespace HardModePatch.Core
 
         public static bool HasOurs(string careers) { return Ours(Parse(careers), 0).Count > 0; }
 
-        // While RLO can't read our courses: the hold to store, our records in RLO's line, or the hold as it is when the
-        // line no longer has them (RLO has saved without them). A record already held unchanged keeps the day it was
-        // first held, so a line RLO leaves alone for days still counts as held since then. RLO's line is never changed.
+        // While RLO can't read our courses: the hold to store. Our records in RLO's line, plus every held record the
+        // line doesn't have as it was held: a hold never loses a record it has. A record already held unchanged keeps
+        // the day it was first held, so a line RLO leaves alone for days counts as held since then. RLO's line is never
+        // changed. Null when there is nothing to hold.
         public static string Keep(string careers, string held, int today)
         {
             var line = Parse(careers);
@@ -164,9 +165,12 @@ namespace HardModePatch.Core
             var ours = Ours(line, today);
             if (ours.Count == 0) return held;
             if (previous != null && previous.Version != line.Version) return held;
+            var heldRecords = HeldIn(previous);
             var days = new Dictionary<string, int>();
-            foreach (var h in HeldIn(previous)) if (!days.ContainsKey(h.Record)) days[h.Record] = h.Day;
+            foreach (var h in heldRecords) if (!days.ContainsKey(h.Record)) days[h.Record] = h.Day;
             foreach (var record in ours) { int day; if (days.TryGetValue(record.Record, out day)) record.Day = day; }
+            var inLine = new HashSet<string>(ours.Select(r => r.Record));
+            ours.AddRange(heldRecords.Where(h => !inLine.Contains(h.Record)));
             return Write(line.Version, ours);
         }
 
@@ -203,21 +207,48 @@ namespace HardModePatch.Core
         {
             // RLO's careers line to store, or null when it stays as it is.
             public string Careers;
-            // True when the hold is done with and can be removed.
+            // True when the hold is done with and can be removed; otherwise Hold is what still waits.
             public bool Done;
+            public string Hold;
             public int Records;
-            // Held records not found as they were in a line that has our courses again: RLO's newer records replace them.
-            public int Superseded;
             public string Waiting;
         }
 
-        // With a reviewed RLO and our courses registered, the hold is settled in one step:
-        // - RLO's line still has our records (RLO never rewrote them, for example with its study switched off): those
-        //   that are as they were held are moved on by the days held; the hold is done.
-        // - The line has none: every held record goes back at once, moved on, or none does. They go back only if RLO's
-        //   reader will keep them all (at most liveMost courses under way, one per course, resultsMost results); RLO's
-        //   reader checks nothing else for a course it knows. Otherwise the hold waits, unchanged.
-        // Null when the line or the hold can't be read or their versions differ: the hold waits.
+        // Why the records can't all join RLO's line, or null when RLO's reader will keep every one of them: at most
+        // liveMost courses under way, one per course, and resultsMost results. RLO's reader checks nothing else for a
+        // course it knows. Every record already in the line counts, so this errs only towards waiting.
+        static string NoRoom(Line line, List<Held> records, int liveMost, int resultsMost)
+        {
+            var under = (line.Records('c') ?? new List<string>()).Select(r => FromLine('c', r, 0)).Where(r => r.Live).ToList();
+            int live = under.Count;
+            var liveCourses = new HashSet<int>(under.Select(r => r.Id));
+            int results = (line.Records('r') ?? new List<string>()).Count;
+            foreach (var record in records)
+            {
+                if (record.Part == 'c')
+                {
+                    if (!record.Live) return "a finished record is in the courses part";
+                    if (live >= liveMost) return "RLO's limit of " + liveMost + " courses under way is reached";
+                    if (liveCourses.Contains(record.Id)) return "course " + record.Id + " is already under way";
+                    live++;
+                    liveCourses.Add(record.Id);
+                }
+                else
+                {
+                    if (record.Live) return "a course under way is in the results part";
+                    if (results >= resultsMost) return "RLO's limit of " + resultsMost + " results is reached";
+                    results++;
+                }
+            }
+            return null;
+        }
+
+        // With a reviewed RLO and our courses registered:
+        // 1. Held records that RLO's line still has as they were held (RLO never rewrote them, for example with its
+        //    study switched off) are moved on in place.
+        // 2. The other held records go back together, moved on, if RLO's reader will keep them all, or none of them do
+        //    and they keep waiting in the hold. All or nothing, so two attempts at a course are never told apart.
+        // Null when the line or the hold can't be read or their versions differ: the hold waits as it is.
         public static Restored Restore(string careers, string held, int today, int liveMost, int resultsMost)
         {
             var line = Parse(careers);
@@ -225,63 +256,41 @@ namespace HardModePatch.Core
             if (line == null || hold == null || line.Version != hold.Version) return null;
             var heldRecords = HeldIn(hold);
             var result = new Restored();
-            var lineOurs = Ours(line, today);
-            if (lineOurs.Count > 0)
+            var days = new Dictionary<string, int>();
+            foreach (var h in heldRecords) if (!days.ContainsKey(h.Record)) days[h.Record] = h.Day;
+            var inLine = new HashSet<string>(Ours(line, today).Select(r => r.Record));
+            bool changed = false;
+            foreach (char letter in Parts)
             {
-                var asThey = new HashSet<string>(lineOurs.Select(r => r.Record));
-                result.Superseded = heldRecords.Count(h => !asThey.Contains(h.Record));
-                var days = new Dictionary<string, int>();
-                foreach (var h in heldRecords) if (!days.ContainsKey(h.Record)) days[h.Record] = h.Day;
-                bool changed = false;
-                foreach (char letter in Parts)
+                var records = line.Records(letter);
+                if (records == null) continue;
+                for (int i = 0; i < records.Count; i++)
                 {
-                    var records = line.Records(letter);
-                    if (records == null) continue;
-                    for (int i = 0; i < records.Count; i++)
-                    {
-                        int day;
-                        if (!days.TryGetValue(records[i], out day)) continue;
-                        var record = FromLine(letter, records[i], today);
-                        if (!Ids.Contains(record.Id)) continue;
-                        Pause(record, today - day);
-                        if (record.Record == records[i]) continue;
-                        records[i] = record.Record;
-                        result.Records++;
-                        changed = true;
-                    }
+                    int day;
+                    if (!inLine.Contains(records[i]) || !days.TryGetValue(records[i], out day)) continue;
+                    var record = FromLine(letter, records[i], today);
+                    Pause(record, today - day);
+                    result.Records++;
+                    if (record.Record == records[i]) continue;
+                    records[i] = record.Record;
+                    changed = true;
                 }
-                result.Careers = changed ? line.ToString() : null;
+            }
+            var rest = heldRecords.Where(h => !inLine.Contains(h.Record)).ToList();
+            result.Waiting = NoRoom(line, rest, liveMost, resultsMost);
+            if (result.Waiting == null)
+            {
+                foreach (var record in rest)
+                {
+                    Pause(record, today - record.Day);
+                    line.Ensure(record.Part).Add(record.Record);
+                    changed = true;
+                }
+                result.Records += rest.Count;
                 result.Done = true;
-                return result;
             }
-            var under = (line.Records('c') ?? new List<string>()).Select(r => FromLine('c', r, today)).Where(r => r.Live).ToList();
-            int live = under.Count;
-            var liveCourses = new HashSet<int>(under.Select(r => r.Id));
-            int results = (line.Records('r') ?? new List<string>()).Count;
-            foreach (var record in heldRecords)
-            {
-                if (record.Part == 'c')
-                {
-                    if (!record.Live || live >= liveMost || liveCourses.Contains(record.Id))
-                    { result.Waiting = record.Live ? "RLO's limit of " + liveMost + " courses under way, one per course, is reached" : "a finished record is in the courses part"; return result; }
-                    live++;
-                    liveCourses.Add(record.Id);
-                }
-                else
-                {
-                    if (record.Live || results >= resultsMost)
-                    { result.Waiting = record.Live ? "a course under way is in the results part" : "RLO's limit of " + resultsMost + " results is reached"; return result; }
-                    results++;
-                }
-            }
-            foreach (var record in heldRecords)
-            {
-                Pause(record, today - record.Day);
-                line.Ensure(record.Part).Add(record.Record);
-            }
-            result.Records = heldRecords.Count;
-            result.Careers = heldRecords.Count == 0 ? null : line.ToString();
-            result.Done = true;
+            else result.Hold = Write(hold.Version, rest);
+            result.Careers = changed ? line.ToString() : null;
             return result;
         }
     }

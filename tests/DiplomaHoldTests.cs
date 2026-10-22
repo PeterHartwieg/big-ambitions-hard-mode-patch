@@ -92,11 +92,35 @@ public class DiplomaHoldTests
         var noRoom = DiplomaHold.Restore("v=1~h:1~c:" + Ordinary + ";6|0|2|0|0|8;7|0|2|0|0|8;8|0|2|0|0|8~r:", held, 51, 4, 40)!;
         Assert.False(noRoom.Done);
         Assert.Contains("4 courses", noRoom.Waiting);
-        // A line that already has one of our courses again is RLO's newer record: it is left as it is.
-        var newer = DiplomaHold.Restore("v=1~h:1~c:19|0|45|1|1|46~r:", DiplomaHold.Keep("v=1~h:1~c:" + Course19, null, 30)!, 51, 4, 40)!;
-        Assert.True(newer.Done);
-        Assert.Null(newer.Careers);
-        Assert.Equal(1, newer.Superseded);
+        // A held course under way waits while the same course is under way again in RLO's line.
+        var again = DiplomaHold.Restore("v=1~h:1~c:19|0|45|1|1|46~r:", DiplomaHold.Keep("v=1~h:1~c:" + Course19, null, 30)!, 51, 4, 40)!;
+        Assert.False(again.Done);
+        Assert.Contains("already under way", again.Waiting);
+        Assert.Contains("30#" + Course19, again.Hold);
+    }
+
+    [Fact]
+    public void ANewEnrolmentWhileTheHoldWaitsNeverDropsTheHeldRecords()
+    {
+        // A pass waits for room in a save with 40 results; the player enrols in another of our courses meanwhile.
+        string held = DiplomaHold.Keep("v=1~h:1~c:~r:" + Passed18, null, 31)!;
+        string forty = string.Join(";", Enumerable.Range(100, 40).Select(i => i + "|0|1|5|5|6|2|800|0|0|0|0|2|10|12|0|60|3|12|0|0|0|0|-1"));
+        string withNew = "v=1~h:1~c:" + Course19 + "~r:" + forty;
+        var waits = DiplomaHold.Restore(withNew, held, 51, 4, 40)!;
+        Assert.False(waits.Done);
+        Assert.Null(waits.Careers);
+        Assert.Equal(1, DiplomaHold.Count(waits.Hold));
+        Assert.Contains("31#" + Passed18, waits.Hold);
+        // Back to an unreviewed RLO: the hold keeps the pass and adds the new course.
+        string kept = DiplomaHold.Keep(withNew, waits.Hold, 60)!;
+        Assert.Contains("31#" + Passed18, kept);
+        Assert.Contains("60#" + Course19, kept);
+        // Room again: the pass goes back, the new course is RLO's own and stays as it is.
+        string room = "v=1~h:1~c:" + Course19 + "~r:" + string.Join(";", Enumerable.Range(100, 39).Select(i => i + "|0|1|5|5|6|2|800|0|0|0|0|2|10|12|0|60|3|12|0|0|0|0|-1"));
+        var back = DiplomaHold.Restore(room, waits.Hold, 70, 4, 40)!;
+        Assert.True(back.Done);
+        Assert.Contains(Passed18, back.Careers);
+        Assert.Contains("~c:" + Course19 + "~", back.Careers);
     }
 
     [Fact]
@@ -105,7 +129,7 @@ public class DiplomaHoldTests
         string held = DiplomaHold.Keep(Line, null, 31)!;
         var back = DiplomaHold.Restore(Line, held, 45, 4, 40)!;
         Assert.True(back.Done);
-        Assert.Equal(2, back.Records);
+        Assert.Equal(5, back.Records);
         Assert.Contains("19|0|34|3|3|40|", back.Careers);
         Assert.Contains("|1|45|50|", back.Careers);
         Assert.Contains(Passed18, back.Careers);

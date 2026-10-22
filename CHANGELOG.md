@@ -12,7 +12,7 @@
 
 Defaults: the indebted start, rent, happiness, owner job pay, running costs and factory diplomas stay off until you turn them on or press the button. The patches for other mods stay on, and only act when those mods are installed.
 
-Checked offline only: 156 core tests and the hook, scenario, factory, cost, compatibility, RLO gate and settings checks against the game's and the mods' DLLs. Nothing in this version has run in the game yet.
+Checked offline only: 157 core tests and the hook, scenario, factory, cost, compatibility, RLO gate and settings checks against the game's and the mods' DLLs. Nothing in this version has run in the game yet.
 
 ## Earlier versions
 
