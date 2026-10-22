@@ -10,11 +10,11 @@ namespace HardModePatch
     // "Apply HART series settings" on our options page. It runs only when pressed. For each value in
     // Core/SeriesSettings.Options it finds the registered option by its owner's assembly and its id, writes the value the
     // way the game's own option controls do (an int in PlayerPrefs under "m:<modId>:<optionId>", toggles 0 or 1), calls
-    // the option's OnValueChanged when the value changes (not while a save is loaded), and logs it. Anything it can't find
+    // the option's OnValueChanged when the value changes, and logs it. It writes only at the main menu. Anything it can't find
     // is skipped and listed. Then PlayerPrefs.Save and one notice asking for a restart, since mods read their options at start.
     public static class SeriesSettingsButton
     {
-        public const string NoticeKey = "hardmode_series_applied", PartialKey = "hardmode_series_applied_partial", FailedKey = "hardmode_series_failed";
+        public const string NoticeKey = "hardmode_series_applied", PartialKey = "hardmode_series_applied_partial", FailedKey = "hardmode_series_failed", MainMenuKey = "hardmode_series_main_menu";
 
         sealed class Live
         {
@@ -100,11 +100,18 @@ namespace HardModePatch
             return lines;
         }
 
-        // A save is being played: its city has buildings.
-        static bool SaveLoaded()
+        // The main menu is open: its controller is registered (the game's InstanceBehavior singleton, unregistered on
+        // destroy). SaveGameManager.Current is no guide, since the game keeps the last save there after returning.
+        static bool MainMenuOpen() { return MainMenuController.IsInitialized; }
+
+        static bool AtMainMenu()
         {
-            var save = SaveGameManager.Current;
-            return save != null && save.BuildingRegistrations != null && save.BuildingRegistrations.Count > 0;
+            try { return MainMenuOpen(); }
+            catch (Exception)
+            {
+                var save = SaveGameManager.Current;
+                return save == null || save.BuildingRegistrations == null || save.BuildingRegistrations.Count == 0;
+            }
         }
 
         public static void Apply()
@@ -119,17 +126,22 @@ namespace HardModePatch
 
         static void Run()
         {
+            // In a game the Mods page runs every option's callback with the stored value each time it is opened, and some
+            // callbacks act on the loaded save at once (RLO's clothes rule is kept per save, HMP's rules start charging).
+            // So the button writes only at the main menu.
+            if (!AtMainMenu())
+            {
+                Log.Info("Series settings: not at the main menu; nothing written. Press the button at the main menu.");
+                Notice(MainMenuKey);
+                return;
+            }
             int changed = 0, same = 0;
             var skipped = new List<string>();
             List<Live> registered;
             try { registered = Registered(); }
             catch (Exception ex) { Log.Error("Series settings: could not read the registered mod options, nothing written: " + ex); Notice(FailedKey); return; }
             var foundList = registered.Select(r => r.Found).ToList();
-            // In a loaded save some callbacks act on that save at once (RLO's clothes rule is kept per save, HMP's rules
-            // start charging). There the values are only stored, and every mod reads them when the game starts again.
-            bool live = !SaveLoaded();
-            Log.Info("Series settings: applying " + SeriesSettings.Options.Length + " values"
-                + (live ? "." : "; a save is loaded, so they are stored now and take effect after the restart."));
+            Log.Info("Series settings: applying " + SeriesSettings.Options.Length + " values.");
             foreach (var wanted in SeriesSettings.Options)
             {
                 string reason;
@@ -155,7 +167,7 @@ namespace HardModePatch
                         continue;
                     }
                     UnityEngine.PlayerPrefs.SetInt(key, wanted.Value);
-                    if (live) Invoke(option, wanted.Value);
+                    Invoke(option, wanted.Value);
                     changed++;
                     Log.Info("Series settings: " + wanted.Label + " " + before + " -> " + wanted.Value + " (" + wanted.Why + ").");
                 }

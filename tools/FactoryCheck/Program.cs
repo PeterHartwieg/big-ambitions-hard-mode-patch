@@ -236,14 +236,15 @@ try
     var modData = new Dictionary<string, string> { { "reallife:careers", resavedWithout }, { "hardmodepatch:factory_diplomas_held", held } };
     Set(save, "modData", modData);
     bool OnLoaded() => (bool)gateType.GetMethod("OnGameLoaded", Any).Invoke(null, new[] { save });
-    Check(OnLoaded() && modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "reviewed RLO with courses registered: held records given back, hold kept until RLO saves");
+    Check(OnLoaded() && !modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "reviewed RLO with courses registered: every held record given back at once, the hold cleared");
     var given = Read(modData["reallife:careers"]);
     Check(((IList)Get(given, "Courses")).Count == 2 && (int)Get(((IList)Get(given, "Courses"))[0], "Course") == 19
         && (bool)given.GetType().GetMethod("Holds").Invoke(given, new object[] { 18 })
         && (bool)given.GetType().GetMethod("Holds").Invoke(given, new object[] { 10 }) && (long)Get(given, "LoanCents") == 123456L,
-        "RLO's own reader takes the given-back courses and result, ordinary records unchanged");
+        "RLO's own reader keeps every given-back course and result, ordinary records unchanged");
+    Check(!OnLoaded(), "nothing held: the careers record is left alone");
     // RLO's catch-up after a load counts the classes of a course under way from its last counted class (at most two
-    // weeks back) as missed. Held from day 10 to day 60, a course must stand as it did on day 10.
+    // weeks back) as missed. A held course must not have more counted missed than when it was held.
     int Missed(object e, int today)
     {
         var c = Rlo("StudyCatalogue", "Find", (int)Get(e, "Course"));
@@ -254,43 +255,63 @@ try
         return n;
     }
     object CourseIn(object file, int id) => ((IList)Get(file, "Courses")).Cast<object>().First(e => (int)Get(e, "Course") == id);
-    int before19 = Missed(CourseIn(Read(text), 19), 10), after19 = Missed(CourseIn(Read(modData["reallife:careers"]), 19), 60), unmoved19 = Missed(CourseIn(Read(text), 19), 60);
-    Check(after19 == before19 && unmoved19 > before19, $"a course under way picks up where it stood: {after19} classes missed on day 60, as on day 10 ({unmoved19} without moving its dates)");
-    modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", given);
-    Check(OnLoaded() && !modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "after RLO has saved them the hold is cleared");
-    Check(!OnLoaded(), "nothing held: the careers record is left alone");
-    // An exam window that ran out while held: moved on, RLO doesn't fail it.
+    string Settle(string careers, string h, int day)
+    {
+        modData.Clear(); modData["reallife:careers"] = careers; modData["hardmodepatch:factory_diplomas_held"] = h;
+        Set(save, "Day", day);
+        OnLoaded();
+        return modData["reallife:careers"];
+    }
+    int before19 = Missed(CourseIn(Read(text), 19), 10);
+    foreach (int day in new[] { 11, 13, 17, 31, 66 })
+    {
+        int after = Missed(CourseIn(Read(Settle(resavedWithout, held, day)), 19), day), unmoved = Missed(CourseIn(Read(text), 19), day);
+        Check(after <= before19 && (day != 66 || after == before19), $"held from day 10 to {day}: {after} classes counted missed, {before19} when held ({unmoved} unmoved)");
+    }
+    // An exam held during its window comes back with at least the exam days it had left, on the same weekdays.
     var examFile = Read(text);
     var exam = CourseIn(examFile, 34);
-    Set(exam, "Stage", 1); Set(exam, "ExamFrom", 8); Set(exam, "ExamTo", 13);
+    Set(exam, "Stage", 1); Set(exam, "ExamFrom", 8); Set(exam, "ExamTo", 12);
     string examLine = (string)Rlo("CareersStore", "Write", examFile);
-    modData["hardmodepatch:factory_diplomas_held"] = Keep(examLine, null, 10);
-    modData["reallife:careers"] = resavedWithout;
-    OnLoaded();
-    Check(!(bool)Rlo("StudyRules", "ExamMissed", CourseIn(Read(modData["reallife:careers"]), 34), 60) && (bool)Rlo("StudyRules", "ExamMissed", exam, 60),
-        "an exam window held past its end comes back open; unmoved, RLO would fail it");
-    // A full results list: the pass comes back first, the failed attempt waits, nothing is dropped.
-    var crowded = Activator.CreateInstance(T("StudyFile"));
-    for (int i = 0; i < 39; i++)
+    string examHeld = Keep(examLine, null, 12);
+    int ExamDays(object e, int from) { int n = 0; for (int d = from; d <= (int)Get(e, "ExamTo"); d++) if ((bool)Rlo("StudyRules", "ExamDay", e, d)) n++; return n; }
+    int examLeft = ExamDays(exam, 12);
+    foreach (int day in new[] { 13, 14, 19, 60 })
     {
-        var r = Activator.CreateInstance(T("Enrolment"));
-        Set(r, "Course", 10); Set(r, "Start", 100 + i); Set(r, "Stage", 2);
-        ((IList)Get(crowded, "Results")).Add(r);
+        var back = CourseIn(Read(Settle(resavedWithout, examHeld, day)), 34);
+        Check(!(bool)Rlo("StudyRules", "ExamMissed", back, day) && ExamDays(back, day) >= examLeft,
+            $"exam held on day 12 with {examLeft} exam day(s) left, back on day {day}: {ExamDays(back, day)} left, not missed");
+    }
+    // RLO left its line alone while held (its study switched off): the records are moved on where they are.
+    string untouched = Settle(text, held, 66);
+    Check(!modData.ContainsKey("hardmodepatch:factory_diplomas_held") && Missed(CourseIn(Read(untouched), 19), 66) == before19,
+        "records RLO never rewrote are moved on in place and the hold is cleared");
+    // A full results list: nothing goes back until everything fits, nothing is dropped.
+    IList Results(int count)
+    {
+        var f = Activator.CreateInstance(T("StudyFile"));
+        for (int i = 0; i < count; i++)
+        {
+            var r = Activator.CreateInstance(T("Enrolment"));
+            Set(r, "Course", 10); Set(r, "Start", 100 + i); Set(r, "Stage", 2);
+            ((IList)Get(f, "Results")).Add(r);
+        }
+        return new object[] { f };
     }
     var attempts = Activator.CreateInstance(T("StudyFile"));
-    foreach (var (start, stage) in new[] { (1, 3), (15, 2) })
+    foreach (var (start, stage) in new[] { (1, 3), (1, 4), (15, 2) })
     {
         var r = Activator.CreateInstance(T("Enrolment"));
         Set(r, "Course", 18); Set(r, "Start", start); Set(r, "Stage", stage);
         ((IList)Get(attempts, "Results")).Add(r);
     }
-    modData["hardmodepatch:factory_diplomas_held"] = Keep((string)Rlo("CareersStore", "Write", attempts), null, 10);
-    modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", crowded);
-    OnLoaded();
-    var full = Read(modData["reallife:careers"]);
-    Check(((IList)Get(full, "Results")).Count == 40 && (bool)full.GetType().GetMethod("Holds").Invoke(full, new object[] { 18 }), "with room for one result, RLO keeps the given-back pass");
-    modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", full);
-    Check(OnLoaded() && HoldCount(modData["hardmodepatch:factory_diplomas_held"]) == 2, "the failed attempt that didn't fit stays held");
+    string attemptsHeld = Keep((string)Rlo("CareersStore", "Write", attempts), null, 10);
+    string crowded = (string)Rlo("CareersStore", "Write", Results(39)[0]);
+    Check(Settle(crowded, attemptsHeld, 20) == crowded && modData["hardmodepatch:factory_diplomas_held"] == attemptsHeld,
+        "39 results and three held attempts, two on the same day: nothing given back, the hold waits unchanged");
+    var roomy = Read(Settle((string)Rlo("CareersStore", "Write", Results(37)[0]), attemptsHeld, 20));
+    Check(((IList)Get(roomy, "Results")).Count == 40 && (bool)roomy.GetType().GetMethod("Holds").Invoke(roomy, new object[] { 18 })
+        && !modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "with room for all three, RLO keeps every attempt and the hold is cleared");
     modData.Clear();
     var holdsBridge = bridge.GetField("holds", Any);
     var savedHolds = holdsBridge.GetValue(null);
