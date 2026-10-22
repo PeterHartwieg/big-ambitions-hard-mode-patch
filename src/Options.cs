@@ -64,6 +64,10 @@ namespace HardModePatch
             if (!HappinessRebalance.Available) options.AddHeader("hardmode_happiness_unavailable");
             options.AddSplitter().AddHeader("hardmode_ownerpay_header");
             AddRule(options, Rules.OwnerJobFullPay);
+            options.AddSplitter().AddHeader("hardmode_runningcosts_header");
+            AddRule(options, Rules.EquipmentUtilities);
+            AddRule(options, Rules.OfficeIt);
+            if (!RunningCostsPatch.Available) options.AddHeader("hardmode_runningcosts_unavailable");
             foreach (var target in Rules.All.Where(r => r.Target != null).Select(r => r.Target).Distinct())
             {
                 options.AddSplitter()

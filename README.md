@@ -33,6 +33,16 @@ With **Flats at twice and shops at three times the market rent** on (Settings > 
 
 With **Home activities bank up to four days…** on (Settings > Mods, off by default), home activities give a smaller boost that banks up to four days, so home tops out around 60. Outside activities (cinema, theatre, golf, tennis, casino, swimming, clubs, the pier, walks) give their boost for 4 to 7 days from one visit, so reaching 100 takes a mix of them. "No home" counts −15 instead of −50 while Real Life Overhaul has a hotel room booked for you. Other mods' happiness effects are unchanged.
 
+## Running costs (awaiting playtest)
+
+Two options under **Running costs**, both off by default, for Real Life Overhaul's utilities. They bring back the two Economy Expansion pressures RLO doesn't have. Without RLO, or when a patched RLO member is renamed or its signature changes, nothing is patched and RLO's own bills stand. An RLO update that keeps those shapes but changes what they mean would still be patched, so each RLO update needs a review.
+
+**Appliances and opening hours** (`equipment_utilities`). RLO bills a business's power and water by floor area and business kind, the same for a 2-hour and a 24-hour day. With this on, that floor figure follows the hours open: 12 hours keep RLO's figure, 24 hours cost 1.75 times as much, and a closed day keeps RLO's quarter. Cooking, machines and IT add their own draw while open: a fryer averages 5 kW, a grill 4 kW, a pizza oven 6 kW, factory machines 3 to 40 kW. RLO's closed-day quarter is its allowance for fridges and alarms, so placed fridges, freezers and alarms replace it when they draw more, open or not. RLO's water rate is the kind's basins, so placed sinks, showers, dishwashers and toilets replace its open-hours water when they use more. At RLO's start prices (15¢ a kWh), a 100 m² burger bar with two fryers, two grills, two fridges, a freezer and a drinks fridge pays about $37 a day more for power when open 12 hours, and about $79 more when open 24. Homes keep RLO's bill. The bill, its due day, late fee and cut stay RLO's.
+
+**Office IT** (`office_it`). RLO requires a connection only from graphic designers, web developers, headquarters and its own tech firms. With this on, every office type needs one to open: law firms, marketing, recruitment, event planning, travel, interior installation and import/export too. Each desk with a computer (the game's computer, desktop, gaming PC and laptop) adds $150 a game month of software, cloud and support to the office's internet bill, charged on the days RLO charges the connection. In a 60-day year a month is 5 days, so that is $30 a desk a day; a 20-desk office pays $600 a day. An unpaid bill cuts the connection and the office closes, as RLO already does. The Utilities app still shows the plan's own price; the bill includes the desks. An office that needs a connection only because this option was switched on mid-save gets no grace period. RLO's own tech firms pay RLO's software charge by the seat instead, not this one.
+
+Appliance figures are average draw with typical duty cycles, in `Core/RunningCosts.cs`; other mods' items fall back on the game's flags (factory machine 10 kW, computer 150 W, sink, toilet). Offline checks pass against released RLO 0.45.0 (`tools/CostCheck`); RLO's nightly books, the Utilities app and real saves still need an in-game check.
+
 ## Advanced factory diplomas (awaiting playtest)
 
 With **Require trade diplomas to buy sewing, kiln and polishing machines** on (off by default), the Factory Supply Depot requires the corresponding garment making, electronics technician or jewelry and goldsmithing diploma. HMP adds these as native RLO school courses: eight four-hour classes, three a week, four homework pieces and an exam; base tuition $3,600, $3,900 and $3,800. Their full-time schedules do not overlap. Already-owned machines keep working; the Laser Cutting Machine and plain consumer-goods workstation have no new restriction.
@@ -100,6 +110,7 @@ tools/check-hooks.sh <folder holding the target mods' DLLs>
 dotnet run --project tools/ScenarioCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 dotnet run --project tools/PerformanceCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <folder containing Bakery.dll and PolyModsHyperreal.dll>
 dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
+dotnet run --project tools/CostCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 ```
 
 `tools/check-hooks.sh` loads the built patch, the game's assemblies and the target mods' DLLs in .NET, resolves every hook and applies every patch with Harmony, then removes them. It catches renamed methods, changed signatures and mismatched patch parameters without starting the game. It needs the Unity modules in `build/game-dlls` as well; copy every `Unity*.dll` from the game's `Managed` folder there.
@@ -109,6 +120,8 @@ dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/H
 `PerformanceCheck` verifies exact hook application, the single-call transpiler substitutions, original-body preservation, pre-patch delegates, Help refresh scope and enabling on an existing singleton, typed light cache updates, scene/toggle invalidation and unverified-Bakery price fallback. Engine objects are inert test data; no native rendering/UI or real saves are exercised.
 
 `FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1 or 0.45.0: native course definitions, study/save logic, purchase refusals and fail-safe states, without Unity or a live save.
+
+`CostCheck` applies the running-cost patches to the selected RLO DLL's own billing methods and runs them on fixture accounts and registrations: hours, appliances, homes, office desks, outages and the connection list. It needs `UnityEngine.CoreModule.dll` in the game folder.
 
 `tools/build.sh` compiles with the SDK's C# compiler against the game's own `mscorlib`, so the package runs on the game's Mono runtime. Harmony 2.4.2 is downloaded and checked against a pinned hash.
 

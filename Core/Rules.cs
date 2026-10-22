@@ -48,6 +48,10 @@ namespace HardModePatch.Core
         // Ours: RLO's jobs and gigs pay in full to a player who runs businesses (RLO cuts 15% per business).
         public static readonly Rule OwnerJobFullPay = new Rule("owner_job_full_pay", null, false);
 
+        // Null target: our own running costs on RLO's utilities (Core/RunningCosts). Off by default; the HART pack turns them on.
+        public static readonly Rule EquipmentUtilities = new Rule("equipment_utilities", null, false);
+        public static readonly Rule OfficeIt = new Rule("office_it", null, false);
+
         // The series opts into RLO school diplomas for advanced factory machine purchases.
         public static readonly Rule FactoryDiplomas = new Rule("factory_diplomas", Targets.RealLifeOverhaul, false);
 
@@ -83,7 +87,7 @@ namespace HardModePatch.Core
             IndebtedScenario,
             RentRebalance,
             HappinessRebalance,
-            OwnerJobFullPay, FactoryDiplomas,
+            OwnerJobFullPay, EquipmentUtilities, OfficeIt, FactoryDiplomas,
             HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave,
             AmbienceScalesWithDemand,
             BakeryVanillaMargins,
