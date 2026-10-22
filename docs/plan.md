@@ -182,3 +182,5 @@ Review round 2 (all three "fix"): Astra and Sol found that same-day attempts sti
 Review round 3 (all three "fix", same finding): a new HMP enrolment while the hold waited made the settle treat the held records as superseded and drop them. Now the hold never drops a record: under an unreviewed RLO it keeps every held record plus the line's, and under a reviewed one it moves verbatim records in place and gives the rest back all together or keeps them waiting. Checks: 157 core tests, FactoryCheck 76.
 
 Review round 4: Opus approved. Astra and Sol found that identical held records (two same-day withdrawals) were matched as a set, so one line copy cleared both; now matched one for one. Astra's stranded-hold case (two held enrolments of one course) and Opus's re-enrolled-course nit are documented open items in [RLO compatibility](rlo-compatibility.md). Checks: 158 core tests.
+
+Review round 5: Opus 5.5, GPT 6 Astra and GPT 6.1 Sol all approve (049f085), with wording nits on the open items, applied.
