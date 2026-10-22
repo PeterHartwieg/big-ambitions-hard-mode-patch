@@ -222,14 +222,17 @@ try
     // A save played under an unreviewed RLO lost its diploma records; HMP held them (Core/DiplomaHold, RloGate).
     var hold = patch.GetType("HardModePatch.Core.DiplomaHold", true);
     var gateType = patch.GetType("HardModePatch.RloGate", true);
-    string held = (string)hold.GetMethod("Keep").Invoke(null, new object[] { text, null });
-    Check(held != null && (int)hold.GetMethod("Count").Invoke(null, new object[] { held }) == 3, "the hold takes the three HMP diploma records from RLO's line");
+    string Keep(string line, string previous, int day) => (string)hold.GetMethod("Keep").Invoke(null, new object[] { line, previous, day });
+    int HoldCount(string h) => (int)hold.GetMethod("Count").Invoke(null, new object[] { h });
+    string held = Keep(text, null, 10);
+    Check(held != null && HoldCount(held) == 3, "the hold takes the three HMP diploma attempts from RLO's line");
     var gameAssembly = hooks[0].DeclaringType.Assembly;
     Type gameType = gameAssembly.GetType("GameInstance", true);
     object save = RuntimeHelpers.GetUninitializedObject(gameType);
     var registrations = (IList)Activator.CreateInstance(gameType.GetField("BuildingRegistrations").FieldType);
     registrations.Add(RuntimeHelpers.GetUninitializedObject(registrations.GetType().GetGenericArguments()[0]));
     Set(save, "BuildingRegistrations", registrations);
+    Set(save, "Day", 60);
     var modData = new Dictionary<string, string> { { "reallife:careers", resavedWithout }, { "hardmodepatch:factory_diplomas_held", held } };
     Set(save, "modData", modData);
     bool OnLoaded() => (bool)gateType.GetMethod("OnGameLoaded", Any).Invoke(null, new[] { save });
@@ -238,10 +241,57 @@ try
     Check(((IList)Get(given, "Courses")).Count == 2 && (int)Get(((IList)Get(given, "Courses"))[0], "Course") == 19
         && (bool)given.GetType().GetMethod("Holds").Invoke(given, new object[] { 18 })
         && (bool)given.GetType().GetMethod("Holds").Invoke(given, new object[] { 10 }) && (long)Get(given, "LoanCents") == 123456L,
-        "RLO's own reader takes the given-back course and result, ordinary records unchanged");
+        "RLO's own reader takes the given-back courses and result, ordinary records unchanged");
+    // RLO's catch-up after a load counts the classes of a course under way from its last counted class (at most two
+    // weeks back) as missed. Held from day 10 to day 60, a course must stand as it did on day 10.
+    int Missed(object e, int today)
+    {
+        var c = Rlo("StudyCatalogue", "Find", (int)Get(e, "Course"));
+        object days = T("StudyRules").GetMethod("Days", Any).Invoke(null, new[] { c, Enum.ToObject(T("StudyMode"), (int)Get(e, "Mode")) });
+        int n = 0;
+        for (int d = Math.Max((int)Get(e, "Start"), Math.Max((int)Get(e, "SettledDay") + 1, today - 14)); d < today; d++)
+            if ((bool)Rlo("StudyRules", "On", days, d) && (bool)Rlo("StudyRules", "Miss", e, d)) n++;
+        return n;
+    }
+    object CourseIn(object file, int id) => ((IList)Get(file, "Courses")).Cast<object>().First(e => (int)Get(e, "Course") == id);
+    int before19 = Missed(CourseIn(Read(text), 19), 10), after19 = Missed(CourseIn(Read(modData["reallife:careers"]), 19), 60), unmoved19 = Missed(CourseIn(Read(text), 19), 60);
+    Check(after19 == before19 && unmoved19 > before19, $"a course under way picks up where it stood: {after19} classes missed on day 60, as on day 10 ({unmoved19} without moving its dates)");
     modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", given);
     Check(OnLoaded() && !modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "after RLO has saved them the hold is cleared");
     Check(!OnLoaded(), "nothing held: the careers record is left alone");
+    // An exam window that ran out while held: moved on, RLO doesn't fail it.
+    var examFile = Read(text);
+    var exam = CourseIn(examFile, 34);
+    Set(exam, "Stage", 1); Set(exam, "ExamFrom", 8); Set(exam, "ExamTo", 13);
+    string examLine = (string)Rlo("CareersStore", "Write", examFile);
+    modData["hardmodepatch:factory_diplomas_held"] = Keep(examLine, null, 10);
+    modData["reallife:careers"] = resavedWithout;
+    OnLoaded();
+    Check(!(bool)Rlo("StudyRules", "ExamMissed", CourseIn(Read(modData["reallife:careers"]), 34), 60) && (bool)Rlo("StudyRules", "ExamMissed", exam, 60),
+        "an exam window held past its end comes back open; unmoved, RLO would fail it");
+    // A full results list: the pass comes back first, the failed attempt waits, nothing is dropped.
+    var crowded = Activator.CreateInstance(T("StudyFile"));
+    for (int i = 0; i < 39; i++)
+    {
+        var r = Activator.CreateInstance(T("Enrolment"));
+        Set(r, "Course", 10); Set(r, "Start", 100 + i); Set(r, "Stage", 2);
+        ((IList)Get(crowded, "Results")).Add(r);
+    }
+    var attempts = Activator.CreateInstance(T("StudyFile"));
+    foreach (var (start, stage) in new[] { (1, 3), (15, 2) })
+    {
+        var r = Activator.CreateInstance(T("Enrolment"));
+        Set(r, "Course", 18); Set(r, "Start", start); Set(r, "Stage", stage);
+        ((IList)Get(attempts, "Results")).Add(r);
+    }
+    modData["hardmodepatch:factory_diplomas_held"] = Keep((string)Rlo("CareersStore", "Write", attempts), null, 10);
+    modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", crowded);
+    OnLoaded();
+    var full = Read(modData["reallife:careers"]);
+    Check(((IList)Get(full, "Results")).Count == 40 && (bool)full.GetType().GetMethod("Holds").Invoke(full, new object[] { 18 }), "with room for one result, RLO keeps the given-back pass");
+    modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", full);
+    Check(OnLoaded() && HoldCount(modData["hardmodepatch:factory_diplomas_held"]) == 2, "the failed attempt that didn't fit stays held");
+    modData.Clear();
     var holdsBridge = bridge.GetField("holds", Any);
     var savedHolds = holdsBridge.GetValue(null);
     holdsBridge.SetValue(null, null);

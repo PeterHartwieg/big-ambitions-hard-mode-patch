@@ -10,12 +10,11 @@ namespace HardModePatch
     // "Apply HART series settings" on our options page. It runs only when pressed. For each value in
     // Core/SeriesSettings.Options it finds the registered option by its owner's assembly and its id, writes the value the
     // way the game's own option controls do (an int in PlayerPrefs under "m:<modId>:<optionId>", toggles 0 or 1), calls
-    // the option's OnValueChanged when the value changes, and logs it. Anything it can't find is skipped and listed.
-    // Then PlayerPrefs.Save, each changed mod's page registered again so an open Mods page shows the new values, and one
-    // notice asking for a restart, since some mods read their options only at start.
+    // the option's OnValueChanged when the value changes (not while a save is loaded), and logs it. Anything it can't find
+    // is skipped and listed. Then PlayerPrefs.Save and one notice asking for a restart, since mods read their options at start.
     public static class SeriesSettingsButton
     {
-        public const string NoticeKey = "hardmode_series_applied", PartialKey = "hardmode_series_applied_partial";
+        public const string NoticeKey = "hardmode_series_applied", PartialKey = "hardmode_series_applied_partial", FailedKey = "hardmode_series_failed";
 
         sealed class Live
         {
@@ -101,16 +100,36 @@ namespace HardModePatch
             return lines;
         }
 
+        // A save is being played: its city has buildings.
+        static bool SaveLoaded()
+        {
+            var save = SaveGameManager.Current;
+            return save != null && save.BuildingRegistrations != null && save.BuildingRegistrations.Count > 0;
+        }
+
         public static void Apply()
+        {
+            try { Run(); }
+            catch (Exception ex)
+            {
+                Log.Error("Series settings: stopped: " + ex);
+                Notice(FailedKey);
+            }
+        }
+
+        static void Run()
         {
             int changed = 0, same = 0;
             var skipped = new List<string>();
-            var pages = new Dictionary<string, ModOptions>();
             List<Live> registered;
             try { registered = Registered(); }
-            catch (Exception ex) { Log.Error("Series settings: could not read the registered mod options, nothing written: " + ex); Notice(PartialKey); return; }
+            catch (Exception ex) { Log.Error("Series settings: could not read the registered mod options, nothing written: " + ex); Notice(FailedKey); return; }
             var foundList = registered.Select(r => r.Found).ToList();
-            Log.Info("Series settings: applying " + SeriesSettings.Options.Length + " values.");
+            // In a loaded save some callbacks act on that save at once (RLO's clothes rule is kept per save, HMP's rules
+            // start charging). There the values are only stored, and every mod reads them when the game starts again.
+            bool live = !SaveLoaded();
+            Log.Info("Series settings: applying " + SeriesSettings.Options.Length + " values"
+                + (live ? "." : "; a save is loaded, so they are stored now and take effect after the restart."));
             foreach (var wanted in SeriesSettings.Options)
             {
                 string reason;
@@ -121,21 +140,23 @@ namespace HardModePatch
                     Log.Warn("Series settings: skipped " + wanted.Label + ": " + reason + ".");
                     continue;
                 }
-                var live = registered.First(r => ReferenceEquals(r.Found, found));
+                var option = registered.First(r => ReferenceEquals(r.Found, found)).Option;
                 string key = SeriesSettings.PrefKey(found.ModId, found.Id);
                 try
                 {
-                    int before = UnityEngine.PlayerPrefs.HasKey(key) ? UnityEngine.PlayerPrefs.GetInt(key) : Default(live.Option);
+                    bool stored = UnityEngine.PlayerPrefs.HasKey(key);
+                    int before = stored ? UnityEngine.PlayerPrefs.GetInt(key) : Default(option);
                     if (before == wanted.Value)
                     {
+                        // Stored even when it is the mod's default, so a later default change doesn't move it.
+                        if (!stored) UnityEngine.PlayerPrefs.SetInt(key, wanted.Value);
                         same++;
-                        Log.Info("Series settings: " + wanted.Label + " already " + wanted.Value + ".");
+                        Log.Info("Series settings: " + wanted.Label + " already " + wanted.Value + (stored ? "." : " (the default, now stored)."));
                         continue;
                     }
                     UnityEngine.PlayerPrefs.SetInt(key, wanted.Value);
-                    Invoke(live.Option, wanted.Value);
+                    if (live) Invoke(option, wanted.Value);
                     changed++;
-                    if (found.Owner != SeriesSettings.Self) pages[found.ModId] = live.Page;
                     Log.Info("Series settings: " + wanted.Label + " " + before + " -> " + wanted.Value + " (" + wanted.Why + ").");
                 }
                 catch (Exception ex)
@@ -146,13 +167,8 @@ namespace HardModePatch
             }
             try { UnityEngine.PlayerPrefs.Save(); }
             catch (Exception ex) { Log.Error("Series settings: PlayerPrefs.Save failed; the values hold until the game quits normally: " + ex.Message); }
-            // Registering a page again makes an open Mods page rebuild its controls from the stored values.
-            foreach (var page in pages)
-            {
-                try { OptionsService.Register(page.Key, page.Value); }
-                catch (Exception ex) { Log.Warn("Series settings: could not refresh the options page of " + page.Key + ": " + ex.Message); }
-            }
-            Options.Refresh();
+            // No page is registered again: that rebuilds every mod's controls and fires all their callbacks. An open
+            // Mods page shows the new values once it is opened again.
             Log.Info("Series settings: " + changed + " changed, " + same + " already set, " + skipped.Count + " skipped"
                 + (skipped.Count > 0 ? " (" + string.Join(", ", skipped.ToArray()) + ")" : "") + ". Restart the game to use them.");
             Notice(skipped.Count > 0 ? PartialKey : NoticeKey);

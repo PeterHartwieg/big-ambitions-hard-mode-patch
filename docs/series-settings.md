@@ -4,9 +4,11 @@ HART. Mode Patch carries the settings the HART series plays with, so a viewer ca
 
 ## Apply HART series settings (button)
 
-It runs only when pressed. For each row below it finds the option the game has registered, by the assembly of the mod that registered it and the option ID. It never uses a mod ID: that is the Workshop item ID for a Workshop copy and the folder path for a local one. It then does what the game's own option controls do: writes an int to PlayerPrefs under `m:<modId>:<optionId>` (toggles 0 or 1, sliders and dropdowns their value or index; no game option type stores a float) and calls the option's `OnValueChanged`. A value that is already set is left alone and its callback isn't called.
+It runs only when pressed. For each row below it finds the option the game has registered, by the assembly of the mod that registered it and the option ID. It never uses a mod ID: that is the Workshop item ID for a Workshop copy and the folder path for a local one. It then does what the game's own option controls do: writes an int to PlayerPrefs under `m:<modId>:<optionId>` (toggles 0 or 1, sliders and dropdowns their value or index; no game option type stores a float) and calls the option's `OnValueChanged`. A value that already holds is left alone and its callback isn't called; if it holds only because it is the mod's default, the button still stores it, so a later default change in that mod doesn't move it.
 
-Every change goes to `Player.log` as `Series settings: <mod> <option> <before> -> <after> (<why>)`. A missing mod, a missing option, an option of another type, a value outside its range or an ID the mod registers twice is skipped and logged with the reason. Then `PlayerPrefs.Save()`, and each changed mod's options page is registered again with the same options, so an open Mods page shows the new values. One notice asks for a restart; if anything was skipped, the notice says so and points at the log.
+Press it at the main menu. With a save loaded, the button only stores the values and calls no callbacks, because some act on the loaded save at once: RLO's "clothes must be bought" is kept per save, and HMP's own rules would start charging rent and running costs mid-game. Every mod reads the stored values when the game starts again.
+
+Every change goes to `Player.log` as `Series settings: <mod> <option> <before> -> <after> (<why>)`. A missing mod, a missing option, an option of another type, a value outside its range or an ID the mod registers twice is skipped and logged with the reason. Then `PlayerPrefs.Save()` and one notice asking for a restart; if anything was skipped, the notice says so and points at the log, and if the button stops on an error, a third notice says that. No options page is registered again: that rebuilds every mod's controls and fires all their callbacks, so an open Mods page shows the new values only once it is opened again.
 
 Undecided rows of the RLO triage keep RLO's default, and so does every option not listed here: City Performance, Food Trucks, Driven Rides, Campaign Objectives and the recording tools are not touched.
 
@@ -101,7 +103,7 @@ Left out on purpose:
 
 ## Prefill the custom game with the series settings (toggle, on)
 
-A postfix on `UI.MainMenu.CustomGameOptionsHandler.Start` takes the preset the game just set (its first built-in preset), copies it, puts the series values on top and calls the screen's public `SetPreset(GameVariables)`. The sliders then show the series values, and the player can change any of them before starting. It does nothing when the screen's `preventAutoSetOnStart` is set. Every name is looked up at start; if the screen, `SetPreset`, `GetPreset` or any field below is missing or of another type, nothing is patched, the options page says so and the game's own preset stands.
+A postfix on `UI.MainMenu.CustomGameOptionsHandler.Start` takes the preset the game just set (its first built-in preset), copies it, puts the series values on top and calls the screen's public `SetPreset(GameVariables)`. The main menu's `CustomGamePanel.Start` also selects the first preset, which calls `SetPreset` with it, and Unity may run the two Starts in either order, so a second postfix on the panel's Start applies the series values again when the panel has a start button (the in-game settings panel has none). The sliders pass their values on a frame later, in call order, so the last `SetPreset` stands. The player can change any value before starting. It does nothing when the screen's `preventAutoSetOnStart` is set. Every name is looked up at start; if the screen, `SetPreset`, `GetPreset` or any field below is missing or of another type, nothing is patched, the options page says so and the game's own preset stands.
 
 | `GameVariables` field | Series value |
 | --- | --- |
@@ -120,7 +122,7 @@ A postfix on `UI.MainMenu.CustomGameOptionsHandler.Start` takes the preset the g
 | `exportMultiplier` | 0.1 |
 | `sellingMultiplier` | 0.5 (resale value) |
 
-Source: the series-2 campaign's recommended settings (Peter, 20 October), as the release plan lists them. The slider limits live in the game's scene, not in code, so whether 2.0 urgent fees and 0.1 export fit the sliders is unverified; Episode 1's settings screen showed the urgent fees at 200%.
+Source: the series-2 campaign's recommended settings (Peter, 20 October), as the release plan lists them. The prefill is on by default, as the release plan asks, so anyone with HART. Mode Patch installed opens Custom with $0 starting money and these values, the indebted start on or not; the toggle switches it off. The slider limits live in the game's scene, not in code, so whether 2.0 urgent fees and 0.1 export fit the sliders is unverified; Episode 1's settings screen showed the urgent fees at 200%.
 
 ## Comparing with the series PC
 
@@ -134,4 +136,4 @@ The script was parsed and run with PowerShell 7 on macOS against a stand-in regi
 
 ## Checked and not
 
-Checked offline: the table (core tests), every option ID in its mod's DLL, the button's lookup on Dynamic Rivals', Rival Balance's and HMP's real options pages, the prefill hooks and preset against the game's assemblies (build 25482473), and the export script's list against the table. Not checked: the button in the game, RLO's live options page (RLO registers it during its own start, which needs Unity), PlayerPrefs writes, the restart notice at the main menu, the custom game screen and the export script on Windows.
+Checked offline: the table (core tests), every option ID in its mod's DLL, the button's lookup on Dynamic Rivals', Rival Balance's and HMP's real options pages, both prefill hooks and the preset against the game's assemblies (build 25482473), and the export script's list against the table. Read in the source but not run: owner detection on RLO's page (RLO wraps each callback in its own `Guard`, which is RLO code, so the owner is still `RealLifeOverhaul`). Not checked: the button in the game, RLO's live options page (RLO builds it during its own start, which needs Unity), PlayerPrefs writes, the notices at the main menu, the custom game screen and its Start order, and the export script on Windows.

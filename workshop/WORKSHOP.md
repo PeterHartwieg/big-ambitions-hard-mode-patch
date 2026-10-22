@@ -18,7 +18,7 @@ Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). 
 
 **Required items (set on the Workshop page after upload):** none. Every part that needs another mod switches itself on only when that mod is loaded. HART. Mod Pack lists it as a member.
 
-**Bug reports:** open. There is no HART. Mode Patch Discord channel yet; the description below has a placeholder.
+**Bug reports:** open. There is no HART. Mode Patch Discord channel yet; the description below has a `DISCORD-LINK` placeholder to replace or remove before upload.
 
 **Donations:** the PayPal hosted button `Q8KVURCRBFLQN` covers all of Peter's Big Ambitions projects.
 
@@ -32,7 +32,7 @@ The settings and rules the HART. Group series plays with, in one mod. It is part
 [h2]Series settings[/h2]
 Under Settings > Mods > HART. Mode Patch:
 [list]
-[*][b]Apply HART series settings[/b]: one button sets the series values in this mod, HART Rival Balance (Normal), Dynamic Rivals (7 wholesale and 8 import rivals, Vanilla occupancy, Balanced events) and Real Life Overhaul (its own camera and Flare off, fewer interruptions and notices, its core systems on). Every change goes to Player.log, anything it can't find is skipped and listed, and it asks you to restart. It only runs when you press it and leaves every other option alone.
+[*][b]Apply HART series settings[/b]: press it at the main menu. One button sets the series values in this mod, HART Rival Balance (Normal), Dynamic Rivals (7 wholesale and 8 import rivals, Vanilla occupancy, Balanced events) and Real Life Overhaul (its own camera and Flare off, fewer interruptions and notices, its core systems on). Every change goes to Player.log, anything it can't find is skipped and listed, and it asks you to restart. It only runs when you press it and leaves every other option alone.
 [*][b]Prefill the custom game with the series settings[/b] (on): New game > Custom opens with the series values. 60 days a year, $0 starting money, rival attacks 150%, age 18, tax 51%, salaries, public prices and bank interest 130%, customer promotion 50%, urgent fees 200%, export 10%, resale value 50%, every Disable and Unlock box off. Change anything before you start, or switch it off.
 [/list]
 
@@ -53,7 +53,7 @@ On by default, each only when that mod is installed:
 [*][b]Internet Cafe[/b]: at most two customers per PC per hour while you're away.
 [*][b]Meaningful Ambience[/b]: decor adds a share of the customers the game sends, not of the building's capacity.
 [*][b]Vending Machines[/b]: a rival's furniture stays locked while you place a machine in their building.
-[*][b]Empire Bank[/b]: withdrawals are taxed, no emergency central bank borrowing, honest credit scores, capped product terms, no requests to the author's servers.
+[*][b]Empire Bank[/b]: withdrawals are taxed, no emergency central bank borrowing, honest credit scores, capped product terms, and no statistics or supporters requests to the author's servers (its own opt-in heartbeat stays).
 [*][b]Hardcore Ambitions[/b]: keeps your difficulty settings and drops the investment funds.
 [/list]
 
@@ -62,6 +62,7 @@ Other mods update on their own schedule. If one changes the code a fix relies on
 
 [h2]Good to know[/h2]
 [list]
+[*]This is the first release. It has been checked against the game's and the other mods' code, but not yet played. Report anything odd.
 [*]Performance changes live in City Performance, not here.
 [*]Back up a save you care about before loading it with new mods.
 [*]Lines starting [HART. Mode Patch] in Player.log (%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions) show what the mod did and why.

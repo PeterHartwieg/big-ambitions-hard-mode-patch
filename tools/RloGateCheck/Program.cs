@@ -85,14 +85,21 @@ gameType.GetField("modData")!.SetValue(save, data);
 bool Loaded() => (bool)gate.GetMethod("OnGameLoaded", Any)!.Invoke(null, new[] { save })!;
 Check(!Loaded() && data.Count == 1 && NoticeSink.Keys.Count == 0, "character creation (no city yet): nothing read, no notice");
 regs.Add(RuntimeHelpers.GetUninitializedObject(regs.GetType().GetGenericArguments()[0]));
+gameType.GetField("Day")!.SetValue(save, 31);
+// A save without diploma records, from a player who uses none of the RLO rules: the log line only.
+var plain = new Dictionary<string, string> { { "reallife:careers", "v=1~h:7|1|30~c:5|0|2|1~r:" } };
+gameType.GetField("modData")!.SetValue(save, plain);
+Check(Loaded() && plain.Count == 1 && NoticeSink.Keys.Count == 0, "no diploma records and no RLO rule on: nothing held, no notice");
+gameType.GetField("modData")!.SetValue(save, data);
 Check(Loaded() && data["reallife:careers"] == line, "city loaded: RLO's careers record is left as it is");
 var hold = P("Core.DiplomaHold");
 Check(data.TryGetValue("hardmodepatch:factory_diplomas_held", out var held) && (int)hold.GetMethod("Count")!.Invoke(null, new object[] { held })! == 2
-    && !held.Contains("5|0|2|1"), "both diploma records are held in HMP's own save line, nothing else");
-Check(NoticeSink.Keys.SequenceEqual(new[] { "hardmode_rlo_unreviewed_held" }), "one in-game notice says so");
+    && !held.Contains("5|0|2|1") && held.Contains("31#19|"), "both diploma records are held in HMP's own save line with the day, nothing else");
+Check(NoticeSink.Keys.SequenceEqual(new[] { "hardmode_rlo_unreviewed" }), "one in-game notice says so");
 // RLO saves without them; the next load keeps the hold and shows no second notice.
 data["reallife:careers"] = "v=1~h:7|1|10~s:3|5000|5000|8~c:5|0|2|1|1|8~r:~w:~q:~t:-1|0";
-Check(Loaded() && data["hardmodepatch:factory_diplomas_held"] == held && NoticeSink.Keys.Count == 1, "after RLO resaves, the hold stays and the notice isn't repeated");
+gameType.GetField("Day")!.SetValue(save, 32);
+Check(Loaded() && data["hardmodepatch:factory_diplomas_held"] == held && NoticeSink.Keys.Count == 1, "after RLO resaves, the hold stays as it was and the notice isn't repeated");
 Console.WriteLine($"ALL {checks} RLO GATE CHECKS PASSED (offline; the in-game notice and a real save remain unverified)");
 return 0;
 

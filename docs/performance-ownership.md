@@ -1,4 +1,4 @@
-# Performance ownership handoff — 22 October 2026
+# Performance ownership handoff, 22 October 2026
 
 Candidate pair: **HART. Mode Patch 0.4.2 / City Performance 0.4.4**. Source and offline assembly tests only; not installed or validated in a running game.
 

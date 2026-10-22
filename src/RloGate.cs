@@ -17,7 +17,7 @@ namespace HardModePatch
         static readonly Harmony harmony = new Harmony(HardModePatchMod.HarmonyId + ".rlogate");
         static readonly object gate = new object();
         static Assembly seen;
-        static bool accepted, noticeShown, heldNoticeShown;
+        static bool accepted, noticeShown;
 
         public static string Message { get; private set; }
 
@@ -88,10 +88,12 @@ namespace HardModePatch
         internal static bool OnGameLoaded(GameInstance game)
         {
             bool refused;
+            Assembly rlo;
             lock (gate)
             {
                 if (seen == null) return false;
                 refused = !accepted;
+                rlo = seen;
             }
             // Game-loaded also fires when character creation opens, before the city exists; nothing is read then.
             if (game == null || game.BuildingRegistrations == null || game.BuildingRegistrations.Count == 0) return false;
@@ -102,50 +104,66 @@ namespace HardModePatch
                 data.TryGetValue(DiplomaHold.CareersKey, out line);
                 data.TryGetValue(DiplomaHold.HoldKey, out held);
             }
-            if (refused)
+            // RLO can't read our courses: an unreviewed build, or a reviewed one whose catalogue didn't take them.
+            if (refused || !RealLifeOverhaulPatch.CoursesRegistered)
             {
-                string kept = DiplomaHold.Keep(line, held);
+                string kept = DiplomaHold.Keep(line, held, game.Day);
                 if (kept != null && kept != held)
                 {
                     data[DiplomaHold.HoldKey] = kept;
-                    Log.Info("Factory diplomas: " + DiplomaHold.Count(kept) + " diploma record(s) of this save held for a reviewed Real Life Overhaul.");
+                    Log.Info("Factory diplomas: " + DiplomaHold.Count(kept) + " diploma record(s) of this save held until Real Life Overhaul can read them again.");
                 }
-                Notice(kept != null);
-                return true;
+                if (refused && (kept != null || RloRulesOn())) Notice();
+                return kept != null || refused;
             }
             if (held == null) return false;
-            if (!RealLifeOverhaulPatch.CoursesRegistered)
-            {
-                Log.Warn("Factory diplomas: this save has held diploma records, but HMP's courses aren't registered in Real Life Overhaul; they stay held.");
-                return false;
-            }
             if (DiplomaHold.Covered(line, held))
             {
                 data.Remove(DiplomaHold.HoldKey);
-                Log.Info("Factory diplomas: the held diploma records are back in Real Life Overhaul's careers record; the hold is cleared.");
+                Log.Info("Factory diplomas: every held diploma record is back in Real Life Overhaul's careers record; the hold is cleared.");
                 return true;
             }
-            int added;
-            string restored = DiplomaHold.Restore(line, held, out added);
+            var restored = DiplomaHold.Restore(line, held, game.Day, Limit(rlo, "RealLifeOverhaul.Careers.StudyRules", "LiveMost", 4),
+                Limit(rlo, "RealLifeOverhaul.Careers.StudyFile", "ResultsMost", 40));
             if (restored == null)
             {
                 Log.Warn("Factory diplomas: held diploma records can't be given back yet (no careers record in this save, or another format); they stay held.");
                 return false;
             }
-            data[DiplomaHold.CareersKey] = restored;
-            Log.Info("Factory diplomas: " + added + " held diploma record(s) given back to Real Life Overhaul; the hold stays until RLO has saved them.");
+            if (restored.Careers != null) data[DiplomaHold.CareersKey] = restored.Careers;
+            if (restored.Hold != null) data[DiplomaHold.HoldKey] = restored.Hold;
+            Log.Info("Factory diplomas: " + restored.Added + " held diploma record(s) given back to Real Life Overhaul, courses under way moved on by the days they were held"
+                + (restored.Waiting > 0 ? "; " + restored.Waiting + " wait for room (RLO keeps at most its limit of courses under way and results)" : "")
+                + ". The hold stays until RLO has saved them.");
             return true;
         }
 
-        static void Notice(bool held)
+        // RLO's own limit, or the 0.49.0 value when it can't be read.
+        static int Limit(Assembly rlo, string type, string name, int otherwise)
+        {
+            try
+            {
+                var field = rlo.GetType(type, false)?.GetField(name, BindingFlags.Public | BindingFlags.Static);
+                return field != null && field.IsLiteral && field.FieldType == typeof(int) ? (int)field.GetRawConstantValue() : otherwise;
+            }
+            catch (Exception) { return otherwise; }
+        }
+
+        // A player who uses none of the RLO rules doesn't need to hear that they are off.
+        static bool RloRulesOn()
+        {
+            return Rules.FactoryDiplomas.Enabled || Rules.EquipmentUtilities.Enabled || Rules.OfficeIt.Enabled
+                || Rules.OwnerJobFullPay.Enabled || Rules.HappinessRebalance.Enabled;
+        }
+
+        static void Notice()
         {
             lock (gate)
             {
-                if (held ? heldNoticeShown : noticeShown) return;
+                if (noticeShown) return;
                 noticeShown = true;
-                if (held) heldNoticeShown = true;
             }
-            try { Notifications.Show(NotificationType.Warning, held ? "hardmode_rlo_unreviewed_held" : "hardmode_rlo_unreviewed", null, 15f, "HmpRloUnreviewed"); }
+            try { Notifications.Show(NotificationType.Warning, "hardmode_rlo_unreviewed", null, 15f, "HmpRloUnreviewed"); }
             catch (Exception ex) { Log.Error("Could not show the Real Life Overhaul notice: " + ex.Message); }
         }
     }

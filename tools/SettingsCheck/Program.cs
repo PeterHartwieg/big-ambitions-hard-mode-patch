@@ -87,10 +87,11 @@ Check(choices[0] == "7" && choices[1] == "8" && ((string[])occupancy.GetType().G
 // 3. Custom game prefill on the game's own screen type.
 var prefill = P("CustomGamePrefill");
 var hooks = (IList<MethodBase>)prefill.GetMethod("ResolveHooks")!.Invoke(null, null)!;
-Check(hooks.Count == 2 && hooks.All(h => h != null), "CustomGameOptionsHandler.Start, SetPreset and every GameVariables field resolve");
+Check(hooks.Count == 3 && hooks.All(h => h != null), "CustomGameOptionsHandler.Start, SetPreset, every GameVariables field and CustomGamePanel.Start with its handler and start button resolve");
 var harmony = new Harmony("settingscheck");
 harmony.Patch(hooks[0], postfix: new HarmonyMethod(prefill.GetMethod("StartPostfix", Any)));
-Check(Harmony.GetPatchInfo(hooks[0])!.Postfixes.Count == 1, "the Start postfix applies");
+harmony.Patch(hooks[2], postfix: new HarmonyMethod(prefill.GetMethod("PanelStartPostfix", Any)));
+Check(Harmony.GetPatchInfo(hooks[0])!.Postfixes.Count == 1 && Harmony.GetPatchInfo(hooks[2])!.Postfixes.Count == 1, "both Start postfixes apply, so either Start order ends on the series values");
 harmony.UnpatchAll(harmony.Id);
 var variables = game.GetType("GameVariables", true)!;
 var current = Activator.CreateInstance(variables)!;
