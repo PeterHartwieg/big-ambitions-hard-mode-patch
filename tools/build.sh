@@ -47,6 +47,6 @@ dotnet "$CSC" -nologo -noconfig -nostdlib+ -target:library -langversion:9 -optim
 cp "$DEPS/0Harmony.dll" "$OUT/Dependencies/0Harmony.dll"
 cp "$DEPS/Harmony-LICENSE.txt" "$OUT/Dependencies/Harmony-LICENSE.txt"
 cp "$REPO"/config/Locales/*.json "$OUT/Locales/"
-cp "$REPO/README.md" "$REPO/LICENSE.txt" "$OUT/"
+cp "$REPO/README.md" "$REPO/LICENSE.txt" "$REPO/CHANGELOG.md" "$OUT/"
 cp "$REPO/docs/hyperreal-map-return.md" "$REPO/docs/factory-diplomas.md" "$REPO/docs/performance-ownership.md" "$REPO/docs/rlo-compatibility.md" "$REPO/docs/series-settings.md" "$OUT/docs/"
 shasum -a 256 "$OUT/HardModePatch.dll"

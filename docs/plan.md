@@ -75,7 +75,7 @@ Peter, 22 October 2026: the pack dropped Economy Expansion for RLO; bring back t
 - **Checks:** 133 core tests (20 new); `tools/CostCheck` 21 checks against released RLO 0.45.0 (`2f360a365cf7915f`), with Harmony applied to RLO's own methods. Scenario 38, factory 57 and hook checks unchanged. Not yet seen in the game.
 - **To watch in a test save:** the first month's bill in RLO's Utilities app for a food shop and an office, a 24-hour business, a factory, and the BizMan closed reason for a law firm without a connection. Calibrate `SeatMonthCents` and the table against real income if the pressure is too light or heavy.
 
-## Planned for 0.5.0: Alcware Seasons follows RLO's calendar
+## Planned, not in 0.5.0: Alcware Seasons follows RLO's calendar
 
 Peter's decision, 17 October: keep both seasonal mods in the HART pack and make Alcware Seasons follow RLO's calendar. Not written yet.
 

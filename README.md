@@ -2,15 +2,24 @@
 
 Formerly Hard Mode Patch. The DLL, the mod folder and the option IDs keep the old `HardModePatch` name, so installed settings and saves carry over.
 
-A Big Ambitions mod with an optional indebted starting scenario and runtime balance patches for other Workshop mods. Every change has an option under Settings > Mods. The scenario is off by default; with it off and no target mod installed, this changes nothing.
+A Big Ambitions mod for the HART. Group series pack: the series settings in one button, an optional indebted starting scenario, our own balance rules on Real Life Overhaul, and runtime patches that make other Workshop mods fit together. Every change has an option under Settings > Mods. The scenario and our own rules are off by default; with them off and no target mod installed, the only change is the custom game screen opening with the series values, and that has its own switch.
 
-**Status:** 0.4.2 candidate, paired with City Performance 0.4.4. HART. Mode Patch owns mod compatibility and the intended modpack mechanics: prices, scenario, rent, happiness, running costs, factory diplomas and Hyperreal map return. City Performance owns performance changes. This candidate has not been installed or playtested. See [the ownership handoff](docs/performance-ownership.md) for configuration, mixed-version behavior and validation limits.
+**Status:** 0.5.0, the first Workshop release, paired with City Performance 0.5.0. Checked offline only; nothing in 0.5.0 has run in the game yet. See [CHANGELOG.md](CHANGELOG.md).
 
-## Performance ownership
+HART. Mode Patch owns mod compatibility and the pack's intended mechanics: the series settings, prices, the scenario, rent, happiness, running costs, factory diplomas and the Hyperreal map return. City Performance owns every performance change; Bakery's Help discovery and Hyperreal's lamp search moved there in 0.4.2 ([the handoff](docs/performance-ownership.md)).
 
-Bakery's Help discovery and pre-build page insertion have moved to City Performance. Hyperreal's former lamp cache and its enable/destroy hooks are removed; City Performance supplies fresh inactive-inclusive discovery with sorting disabled. These are different algorithms: the fresh query includes newly created inactive lamps on the next scheduled scan, but does not preserve the old cache-hit cost. Native performance must be compared before installation for recording.
+## HART series settings
 
-The old `bakery_help_discovery` and `hyperreal_light_discovery` options are no longer registered by HMP. Existing preference values are left untouched for downgrade. Configure the new City Performance options explicitly when upgrading; old values are not imported automatically. Without an active compatible performance feature, the target mod uses its original discovery.
+Under Settings > Mods > HART. Mode Patch > HART series settings:
+
+- **Apply HART series settings** (a button) sets the values the series plays with: this mod's rules on, HART Rival Balance on Normal, Dynamic Rivals at 7 wholesale and 8 import rivals, Vanilla occupancy and Balanced events, and Real Life Overhaul with its own camera and Flare off, fewer interruptions and notices, and its core systems on. It finds each option by the mod that registered it and the option's ID, writes it the way the game's Mods page does, and logs every change in `Player.log`. A mod or option it can't find is skipped and listed. Restart the game afterwards. It runs only when you press it, and it leaves every option it doesn't list alone.
+- **Prefill the custom game with the series settings** (on) opens New game > Custom with the series values: 60 days a year, $0 starting money, rival attacks 150%, age 18, tax 51%, salaries, public prices and bank interest 130%, customer promotion 50%, urgent fees 200%, export 10%, resale value 50%, every Disable and Unlock box off. Change any of them before you start, or switch the toggle off for the game's own presets.
+
+[The full list of values, their sources and what is left out](docs/series-settings.md). `tools/export-series-settings.ps1` dumps a Windows PC's current values to JSON, to compare a PC with the series profile.
+
+## Real Life Overhaul versions
+
+Real Life Overhaul updates through the Workshop on its own schedule. Factory diplomas, running costs, owner job pay and the hotel rule run only on RLO versions this mod has reviewed: 0.41.1, 0.45.0 and 0.49.0. On any other version they switch off until this mod is updated, with one line in `Player.log` and one notice when a save loads; RLO itself runs as its author published it. Your save's factory diploma courses and results are kept meanwhile and come back with the update. [How the check works and the 0.49.0 review](docs/rlo-compatibility.md).
 
 ## Hyperreal map-return workaround (awaiting playtest)
 
@@ -30,7 +39,7 @@ With **Home activities bank up to four days…** on (Settings > Mods, off by def
 
 ## Running costs (awaiting playtest)
 
-Two options under **Running costs**, both off by default, for Real Life Overhaul's utilities. They bring back the two Economy Expansion pressures RLO doesn't have. Without RLO, or when a patched RLO member is renamed or its signature changes, nothing is patched and RLO's own bills stand. An RLO update that keeps those shapes but changes what they mean would still be patched, so each RLO update needs a review.
+Two options under **Running costs**, both off by default, for Real Life Overhaul's utilities. They bring back the two Economy Expansion pressures RLO doesn't have. Without RLO, on an RLO version this mod hasn't reviewed, or when a patched RLO member is renamed or its signature changes, nothing is patched and RLO's own bills stand.
 
 **Appliances and opening hours** (`equipment_utilities`). RLO bills a business's power and water by floor area and business kind, the same for a 2-hour and a 24-hour day. With this on, that floor figure follows the hours open: 12 hours keep RLO's figure, 24 hours cost 1.75 times as much, and a closed day keeps RLO's quarter. Cooking, machines and IT add their own draw while open: a fryer averages 5 kW, a grill 4 kW, a pizza oven 6 kW, factory machines 3 to 40 kW. RLO's closed-day quarter is its allowance for fridges and alarms, so placed fridges, freezers and alarms replace it when they draw more, open or not. RLO's water rate is the kind's basins, so placed sinks, showers, dishwashers and toilets replace its open-hours water when they use more. At RLO's start prices (15¢ a kWh), a 100 m² burger bar with two fryers, two grills, two fridges, a freezer and a drinks fridge pays about $37 a day more for power when open 12 hours, and about $79 more when open 24. Homes keep RLO's bill. The bill, its due day, late fee and cut stay RLO's.
 
@@ -84,12 +93,17 @@ Each patched mod updates on its own schedule, and this patch can't control that.
 - **Patched (reviewed version):** the DLL matches a version whose code was read for this patch.
 - **Patched (new version, not yet reviewed):** the DLL is new, but every method the patch hooks is still there with the same signature, and every method body the patch skips or replaces is unchanged instruction for instruction. It is patched, and `Player.log` carries a warning.
 - **Not patched:** a hooked method is gone or changed, or a body the patch replaces was rewritten. That mod runs exactly as its author published it until this patch is updated.
+- **Not patched (not reviewed yet):** Real Life Overhaul only. Its features here reach into its save data and bills, so a new RLO version is never patched before it has been reviewed ([RLO versions](#real-life-overhaul-versions)).
 
 The state of each mod shows on the options page and in `Player.log` on lines starting `[HART. Mode Patch]`.
 
+## Planned, not written
+
+- **Alcware Seasons follows RLO's calendar** (Peter, 17 October): Alcware's season picture and demand would follow RLO's seasons. The design is in [docs/plan.md](docs/plan.md).
+
 ## Install
 
-Subscribe on the Workshop (not published yet), or copy `build/HardModePatch` into `%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions\ModsLocal`.
+Subscribe on the Workshop (not published yet; it is part of the HART. Mod Pack), or unzip `build/HardModePatch-0.5.0.zip` into `%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions\ModsLocal`.
 
 Mods load for every save. Back up any save you care about before loading it with this or the mods it patches.
 
@@ -100,6 +114,8 @@ Needs the .NET SDK (8 or newer to build; 10 for the check projects) and the game
 ```bash
 tools/fetch-game-dlls.sh <ssh host of the Windows game PC>
 tools/build.sh
+tools/package.sh   # build/HardModePatch-<version>.zip and its SHA-256
+tools/check-all.sh <target DLL folder> <unreviewed RealLifeOverhaul.dll> <DynamicRivals.dll> <HARTRivalBalance.dll>
 dotnet test tests/HardModePatch.Core.Tests.csproj
 tools/check-hooks.sh <folder holding the target mods' DLLs>
 dotnet run --project tools/ScenarioCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
@@ -107,6 +123,7 @@ dotnet run --project tools/CompatibilityCheck -- build/game-dlls build/HardModeP
 dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 dotnet run --project tools/CostCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 dotnet run --project tools/RloGateCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <unreviewed RealLifeOverhaul.dll>
+dotnet run --project tools/SettingsCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll> <DynamicRivals.dll> <HARTRivalBalance.dll> tools/export-series-settings.ps1
 ```
 
 `tools/check-hooks.sh` loads the built patch, the game's assemblies and the target mods' DLLs in .NET, resolves every hook and applies every patch with Harmony, then removes them. It catches renamed methods, changed signatures and mismatched patch parameters without starting the game. It needs the Unity modules in `build/game-dlls` as well; copy every `Unity*.dll` from the game's `Managed` folder there.
@@ -118,6 +135,8 @@ dotnet run --project tools/RloGateCheck -- build/game-dlls build/HardModePatch/H
 `FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1, 0.45.0 or 0.49.0: native course definitions, study/save logic, purchase refusals, fail-safe states and held records given back, without Unity or a live save.
 
 `RloGateCheck` takes an RLO DLL whose hash isn't reviewed (a release with one byte appended works) and checks that every RLO feature stays off, the refusal is one message and one notice, and a save's diploma records are held.
+
+`SettingsCheck` checks that every option ID the series button writes is in its mod's DLL, runs the button's lookup on the real options pages of Dynamic Rivals, Rival Balance and this mod, and resolves the custom game prefill against the game's screen. RLO's options page needs Unity to build, so RLO's lookup isn't exercised offline.
 
 `CostCheck` applies the running-cost patches to the selected RLO DLL's own billing methods and runs them on fixture accounts and registrations: hours, appliances, homes, office desks, outages and the connection list. It needs `UnityEngine.CoreModule.dll` in the game folder.
 

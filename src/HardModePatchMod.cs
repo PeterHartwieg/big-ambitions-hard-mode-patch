@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using BAModAPI;
 using HarmonyLib;
 
-[assembly: AssemblyVersion("0.4.2.0")]
-[assembly: AssemblyInformationalVersion("0.4.2")]
+[assembly: AssemblyVersion("0.5.0.0")]
+[assembly: AssemblyInformationalVersion("0.5.0")]
 [assembly: RegisterModClass(typeof(HardModePatch.HardModePatchMod))]
 namespace HardModePatch
 {
@@ -15,7 +15,7 @@ namespace HardModePatch
     public sealed class HardModePatchMod : IModBigAmbitions
     {
         public const string HarmonyId = "hardmodepatch";
-        public const string Version = "0.4.2";
+        public const string Version = "0.5.0";
         Patcher patcher;
 
         public string[] RelativeAssetBundlePaths { get { return new string[0]; } }
