@@ -29,6 +29,13 @@ namespace HardModePatch
         void Revert();
     }
 
+    // A target patched only in versions whose code was reviewed. A refused version is left unpatched without the
+    // hook and contract checks; the gate itself logs why, once.
+    public interface IReviewedOnly
+    {
+        bool Accepts(Assembly target);
+    }
+
     public sealed class ContractCheck
     {
         public readonly MethodBase Method;
@@ -131,6 +138,12 @@ namespace HardModePatch
         void Install(ITargetPatch patch, Assembly assembly)
         {
             var target = patch.Target;
+            var reviewed = patch as IReviewedOnly;
+            if (reviewed != null && !reviewed.Accepts(assembly))
+            {
+                states[target.Key] = TargetState.Refused;
+                return;
+            }
             IList<MethodBase> hooks;
             try { hooks = patch.ResolveHooks(assembly); }
             catch (Exception ex) { Log.Error(target.Title + ": hook lookup failed, left unpatched: " + ex); states[target.Key] = TargetState.Incompatible; return; }
@@ -194,7 +207,7 @@ namespace HardModePatch
             return hold;
         }
 
-        static string HashOf(Assembly assembly)
+        internal static string HashOf(Assembly assembly)
         {
             try
             {

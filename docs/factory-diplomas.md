@@ -16,7 +16,7 @@ RLO's Electrician diploma is seven four-hour classes, three homework pieces and 
 
 ## Runtime integration
 
-HMP adds `RealLifeOverhaulPatch` to its initialization-time assembly watcher. It requires released RLO **0.41.1** or **0.45.0** (SHA-256 prefixes `f1b93c176b33f79d`, `2f360a365cf7915f`), exact reflected member shapes, and the reviewed game purchase-method bodies. Unknown RLO builds are left unrestricted even if their method names still match. No RLO files are modified or referenced at compile time.
+HMP adds `RealLifeOverhaulPatch` to its initialization-time assembly watcher. It requires a reviewed RLO build, **0.41.1**, **0.45.0** or **0.49.0** (SHA-256 prefixes `f1b93c176b33f79d`, `2f360a365cf7915f`, `4f82b4f88f919178`), exact reflected member shapes, and the reviewed game purchase-method bodies. Unknown RLO builds are left unrestricted even if their method names still match; HMP then holds a save's diploma records until a reviewed build is back. See [RLO compatibility](rlo-compatibility.md). No RLO files are modified or referenced at compile time.
 
 `ResolveHooks` lists all three patched methods plus the RLO methods/constructor used by the bridge. The RLO types are under `RealLifeOverhaul.Careers`:
 
@@ -41,6 +41,7 @@ RLO's `CareersStore` serializes courses and results by id under `reallife:career
 
 - **Option off, HMP still installed:** the gate opens immediately and new enrolments are hidden. Definitions remain, so enrolled students can finish and active/completed records survive save/load. Re-enabling restores the requirement and offerings.
 - **HMP unloaded while the process runs:** the gate is removed; definitions remain until process exit so live RLO records remain valid. Restart for a clean catalogue.
+- **Unreviewed RLO build, HMP installed:** the records are copied to `hardmodepatch:factory_diplomas_held` before RLO reads the save and given back when a reviewed RLO is loaded again ([RLO compatibility](rlo-compatibility.md)).
 - **HMP removed before starting the game:** unmodified RLO safely skips the unknown course records when reading. Ordinary courses, skills and student debt remain readable. Once RLO resaves, the skipped diploma enrolments/results are lost; reinstalling HMP can only recover them from a save that still contains them. Tuition is not refunded and outstanding student debt is not forgiven. Removing RLO itself leaves HMP's gate off and does not make HMP write RLO data.
 
 ## Validation and playtest

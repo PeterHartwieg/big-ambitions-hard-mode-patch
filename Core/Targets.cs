@@ -25,7 +25,7 @@ namespace HardModePatch.Core
 
     public static class Targets
     {
-        public static readonly TargetInfo RealLifeOverhaul = new TargetInfo("rlo", "Real Life Overhaul", 3816536560, "RealLifeOverhaul", "f1b93c176b33f79d", "2f360a365cf7915f");
+        public static readonly TargetInfo RealLifeOverhaul = new TargetInfo("rlo", "Real Life Overhaul", 3816536560, "RealLifeOverhaul", "f1b93c176b33f79d", "2f360a365cf7915f", "4f82b4f88f919178");
         public static readonly TargetInfo HardcoreAmbitions = new TargetInfo("hardcore", "Hardcore Ambitions", 3809287926, "HardcoreAmbitions", "62ba60cb66dc226c");
         public static readonly TargetInfo MeaningfulAmbience = new TargetInfo("ambience", "Meaningful Ambience", 3810641423, "MeaningfulAmbience", "5564717279c75596");
         public static readonly TargetInfo Bakery = new TargetInfo("bakery", "Bakery", 3810927743, "Bakery", "6d68edab0f5600f5");
@@ -46,7 +46,9 @@ namespace HardModePatch.Core
         // A new version, but every hooked method is still there with the same signature: patched, with a warning.
         Unverified,
         // A hooked method is gone or changed: left unpatched.
-        Incompatible
+        Incompatible,
+        // A target patched only in reviewed versions (Real Life Overhaul) at a version not reviewed yet: left unpatched.
+        Refused
     }
 
     public static class TargetGate
@@ -57,6 +59,15 @@ namespace HardModePatch.Core
         {
             if (string.IsNullOrEmpty(sha256Hex) || sha256Hex.Length < HashPrefixLength) return null;
             return sha256Hex.Substring(0, HashPrefixLength).ToLowerInvariant();
+        }
+
+        // For targets patched only in reviewed versions: an unreadable file (null) is never reviewed.
+        public static bool Reviewed(string hashPrefix, IEnumerable<string> verifiedHashes)
+        {
+            if (hashPrefix == null) return false;
+            foreach (var verified in verifiedHashes)
+                if (string.Equals(verified, hashPrefix, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
         }
 
         // hashPrefix may be null when the DLL file couldn't be read; the hooks then decide alone.

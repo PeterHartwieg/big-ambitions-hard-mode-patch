@@ -15,7 +15,7 @@ using UI.Purchase;
 
 namespace HardModePatch
 {
-    public sealed class RealLifeOverhaulPatch : ITargetPatch
+    public sealed class RealLifeOverhaulPatch : ITargetPatch, IReviewedOnly
     {
         const string Careers = "RealLifeOverhaul.Careers.";
         static FieldInfo catalogue, courseId, courseKey, careersOn, studyOn, campusCache, broken;
@@ -27,6 +27,11 @@ namespace HardModePatch
         static readonly HashSet<string> warnings = new HashSet<string>();
 
         public TargetInfo Target { get { return Targets.RealLifeOverhaul; } }
+
+        public bool Accepts(Assembly target) { return RloGate.Accepts(target); }
+
+        // HMP's three courses are in RLO's catalogue, so RLO can read and keep their records.
+        public static bool CoursesRegistered { get { return injected != null; } }
 
         static MethodInfo Method(Type type, string name, Type result, bool isStatic, params Type[] parameters)
         {
@@ -93,18 +98,9 @@ namespace HardModePatch
             };
         }
 
-        static bool Reviewed(Assembly target)
-        {
-            using (var sha = SHA256.Create())
-            {
-                var hash = TargetGate.HashPrefix(BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(target.Location))).Replace("-", ""));
-                return Targets.RealLifeOverhaul.VerifiedHashes.Contains(hash);
-            }
-        }
-
         public void Apply(Harmony harmony, Assembly target, IList<MethodBase> hooks)
         {
-            if (!Reviewed(target)) throw new InvalidOperationException("Factory diplomas: RLO's catalogue/save layout has not been reviewed; machine sales stay unrestricted.");
+            if (!RloGate.Accepts(target)) throw new InvalidOperationException("Factory diplomas: RLO's catalogue/save layout has not been reviewed; machine sales stay unrestricted.");
             if (hooks.Any(h => h == null)) throw new MissingMemberException("Factory diploma hooks changed.");
             if (instance.Invoke(null, null) != null || campusCache.GetValue(null) != null)
                 throw new InvalidOperationException("Factory diplomas must be installed before RLO starts careers or indexes the campus; restart with HMP loaded at initialization.");
@@ -166,7 +162,7 @@ namespace HardModePatch
 
         public static void ReportAvailability()
         {
-            if (Rules.FactoryDiplomas.Enabled && (!active || failed)) WarnOnce("RLO is missing, not loaded or incompatible");
+            if (Rules.FactoryDiplomas.Enabled && (!active || failed) && !RloGate.Refused) WarnOnce("RLO is missing, not loaded or incompatible");
         }
 
         static void WarnOnce(string reason)

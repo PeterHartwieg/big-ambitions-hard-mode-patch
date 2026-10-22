@@ -17,9 +17,9 @@ namespace HardModePatch
     //   appliances' draw (Core/RunningCosts.DayUse), so the bill, its due day, late fee and cut stay RLO's.
     // - Offices: NeedsNet reads every office type instead of RLO's three, and a postfix on InternetRules.AddDay adds the
     //   desks' IT to the office's connection, billed and cut with it.
-    // RLO is patched by name once its assembly loads, before its books first run. If a member's name or signature is not
-    // as in RLO 0.45.0, or NeedsNet no longer reads the list once, nothing is patched and RLO's own bills stand. An RLO
-    // that keeps those shapes but changes what they mean is still patched: review each RLO update.
+    // RLO is patched by name once its assembly loads, before its books first run, and only in a reviewed RLO build
+    // (RloGate). If a member's name or signature is not as reviewed, or NeedsNet no longer reads the list once, nothing
+    // is patched and RLO's own bills stand.
     public static class RunningCostsPatch
     {
         const string Utilities = "RealLifeOverhaul.Utilities.";
@@ -114,12 +114,13 @@ namespace HardModePatch
         static void TryPatch(Assembly assembly)
         {
             if (patched || assembly == null || assembly.GetName().Name != Targets.RealLifeOverhaul.AssemblyName) return;
+            if (!RloGate.Accepts(assembly)) { patched = true; return; }
             try
             {
                 var hooks = ResolveHooks(assembly);
                 if (hooks.Any(h => h == null) || !NeedsNetReadsList(hooks[2]))
                 {
-                    Log.Warn("Running costs: RLO's utilities have changed since 0.45.0; RLO's own power, water and internet bills stand.");
+                    Log.Warn("Running costs: RLO's utilities have changed since the reviewed version; RLO's own power, water and internet bills stand.");
                     return;
                 }
                 priceLevel = (Func<int>)Delegate.CreateDelegate(typeof(Func<int>), (MethodInfo)hooks[3]);

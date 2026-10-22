@@ -36,13 +36,13 @@ Two options under **Running costs**, both off by default, for Real Life Overhaul
 
 **Office IT** (`office_it`). RLO requires a connection only from graphic designers, web developers, headquarters and its own tech firms. With this on, every office type needs one to open: law firms, marketing, recruitment, event planning, travel, interior installation and import/export too. Each desk with a computer (the game's computer, desktop, gaming PC and laptop) adds $150 a game month of software, cloud and support to the office's internet bill, charged on the days RLO charges the connection. In a 60-day year a month is 5 days, so that is $30 a desk a day; a 20-desk office pays $600 a day. An unpaid bill cuts the connection and the office closes, as RLO already does. The Utilities app still shows the plan's own price; the bill includes the desks. An office that needs a connection only because this option was switched on mid-save gets no grace period. RLO's own tech firms pay RLO's software charge by the seat instead, not this one.
 
-Appliance figures are average draw with typical duty cycles, in `Core/RunningCosts.cs`; other mods' items fall back on the game's flags (factory machine 10 kW, computer 150 W, sink, toilet). Offline checks pass against released RLO 0.45.0 (`tools/CostCheck`); RLO's nightly books, the Utilities app and real saves still need an in-game check.
+Appliance figures are average draw with typical duty cycles, in `Core/RunningCosts.cs`; other mods' items fall back on the game's flags (factory machine 10 kW, computer 150 W, sink, toilet). Offline checks pass against released RLO 0.45.0 and 0.49.0 (`tools/CostCheck`); RLO's nightly books, the Utilities app and real saves still need an in-game check.
 
 ## Advanced factory diplomas (awaiting playtest)
 
 With **Require trade diplomas to buy sewing, kiln and polishing machines** on (off by default), the Factory Supply Depot requires the corresponding garment making, electronics technician or jewelry and goldsmithing diploma. HMP adds these as native RLO school courses: eight four-hour classes, three a week, four homework pieces and an exam; base tuition $3,600, $3,900 and $3,800. Their full-time schedules do not overlap. Already-owned machines keep working; the Laser Cutting Machine and plain consumer-goods workstation have no new restriction.
 
-Requires reviewed RLO 0.41.1 or 0.45.0 with careers and study enabled. Missing/incompatible RLO or unavailable study leaves purchases unrestricted. Turning HMP's option off keeps diploma progress/results and opens sales; removing HMP makes unmodified RLO safely ignore the extra course records and discard them on its next save. Ordinary courses, skills and student debt remain readable. See [design, hooks, save behavior and playtest](docs/factory-diplomas.md). Offline checks pass; Campus UI, physical school activities, live purchases and actual save/load still need an in-game check.
+Requires reviewed RLO 0.41.1, 0.45.0 or 0.49.0 with careers and study enabled. Missing/incompatible RLO or unavailable study leaves purchases unrestricted. Under an RLO build HMP hasn't reviewed, HMP keeps a copy of the save's diploma records and gives them back once a reviewed build is loaded ([RLO compatibility](docs/rlo-compatibility.md)). Turning HMP's option off keeps diploma progress/results and opens sales; removing HMP makes unmodified RLO safely ignore the extra course records and discard them on its next save. Ordinary courses, skills and student debt remain readable. See [design, hooks, save behavior and playtest](docs/factory-diplomas.md). Offline checks pass; Campus UI, physical school activities, live purchases and actual save/load still need an in-game check.
 
 ## Indebted starting scenario
 
@@ -106,6 +106,7 @@ dotnet run --project tools/ScenarioCheck -- build/game-dlls build/HardModePatch/
 dotnet run --project tools/CompatibilityCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <folder containing Bakery.dll and PolyModsHyperreal.dll>
 dotnet run --project tools/FactoryCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
 dotnet run --project tools/CostCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <RealLifeOverhaul.dll>
+dotnet run --project tools/RloGateCheck -- build/game-dlls build/HardModePatch/HardModePatch.dll <unreviewed RealLifeOverhaul.dll>
 ```
 
 `tools/check-hooks.sh` loads the built patch, the game's assemblies and the target mods' DLLs in .NET, resolves every hook and applies every patch with Harmony, then removes them. It catches renamed methods, changed signatures and mismatched patch parameters without starting the game. It needs the Unity modules in `build/game-dlls` as well; copy every `Unity*.dll` from the game's `Managed` folder there.
@@ -114,7 +115,9 @@ dotnet run --project tools/CostCheck -- build/game-dlls build/HardModePatch/Hard
 
 `CompatibilityCheck` verifies price-only Bakery behavior and original-price restoration, exact map-return hooks, camera/fade completion, exposure eligibility, scene/reset/reload cleanup and unreadable binary refusal. It also asserts that HMP no longer owns Help, Scan or lamp lifecycle hooks. City Performance's `OwnershipCheck` covers the moved Help behavior and actual old/new HMP coexistence in both load orders. Engine objects are inert test data; no native rendering/UI or real saves are exercised.
 
-`FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1 or 0.45.0: native course definitions, study/save logic, purchase refusals and fail-safe states, without Unity or a live save.
+`FactoryCheck` exercises the advanced factory diplomas against released RLO 0.41.1, 0.45.0 or 0.49.0: native course definitions, study/save logic, purchase refusals, fail-safe states and held records given back, without Unity or a live save.
+
+`RloGateCheck` takes an RLO DLL whose hash isn't reviewed (a release with one byte appended works) and checks that every RLO feature stays off, the refusal is one message and one notice, and a save's diploma records are held.
 
 `CostCheck` applies the running-cost patches to the selected RLO DLL's own billing methods and runs them on fixture accounts and registrations: hours, appliances, homes, office desks, outages and the connection list. It needs `UnityEngine.CoreModule.dll` in the game folder.
 

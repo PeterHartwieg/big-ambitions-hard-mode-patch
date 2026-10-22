@@ -166,3 +166,7 @@ Margins per unit close to the vanilla bakery and coffee items (croissant $4.29, 
 - Nothing is pushed to other authors' mods. Viewers subscribe to a Steam collection that links the original mods, Rival Balance, Campaign Objectives and this patch; Steam fetches each from its author, and the patch changes their methods in memory.
 - Settings stored per PC (Economy Expansion, Dynamic Rivals, Meaningful Ambience presets) go in the collection description and in a Campaign Objectives campaign that lists the recommended values.
 - When a target updates: diff its decompiled code against the reviewed version, then add the new hash to the verified list or fix the patch, and publish a patch update.
+
+## RLO 0.49.0 and the review gate, 22 October 2026
+
+The Workshop serves RLO 0.49.0, and viewers get RLO updates automatically. Reviewed and accepted 0.49.0 (`4f82b4f88f919178`); the member-by-member review is in [RLO compatibility](rlo-compatibility.md). Every RLO feature (factory diplomas, running costs, owner job pay, the hotel "no home" rule) now runs only on a reviewed RLO build: `src/RloGate.cs` decides once per assembly, logs one line, shows one notice on save load and holds a save's diploma records (`Core/DiplomaHold`) until a reviewed build is back. Running costs and owner job pay were name-gated before; they are hash-gated now. Checks: 139 core tests, FactoryCheck 63, RloGateCheck 16, CostCheck 21, ScenarioCheck 38 against 0.49.0. Not run in the game.

@@ -216,15 +216,41 @@ try
     Check(((IList)Get(withoutHmp, "Courses")).Count == 0 && ((IList)Get(withoutHmp, "Results")).Count == 1, "unmodified RLO safely ignores removed diploma ids");
     Check((bool)withoutHmp.GetType().GetMethod("Holds").Invoke(withoutHmp, new object[] { 10 })
         && (long)Get(withoutHmp, "LoanCents") == 123456L && ((int[])Get(withoutHmp, "Skill"))[16] == 12000, "removal preserves ordinary diploma, skills and student debt");
-    Check(Rlo("CareersStore", "Write", withoutHmp) is string, "RLO can resave after HMP removal");
+    string resavedWithout = (string)Rlo("CareersStore", "Write", withoutHmp);
+    Check(resavedWithout is string, "RLO can resave after HMP removal");
     WriteStatic(catalogue, extended);
+    // A save played under an unreviewed RLO lost its diploma records; HMP held them (Core/DiplomaHold, RloGate).
+    var hold = patch.GetType("HardModePatch.Core.DiplomaHold", true);
+    var gateType = patch.GetType("HardModePatch.RloGate", true);
+    string held = (string)hold.GetMethod("Keep").Invoke(null, new object[] { text, null });
+    Check(held != null && (int)hold.GetMethod("Count").Invoke(null, new object[] { held }) == 3, "the hold takes the three HMP diploma records from RLO's line");
+    var gameAssembly = hooks[0].DeclaringType.Assembly;
+    Type gameType = gameAssembly.GetType("GameInstance", true);
+    object save = RuntimeHelpers.GetUninitializedObject(gameType);
+    var registrations = (IList)Activator.CreateInstance(gameType.GetField("BuildingRegistrations").FieldType);
+    registrations.Add(RuntimeHelpers.GetUninitializedObject(registrations.GetType().GetGenericArguments()[0]));
+    Set(save, "BuildingRegistrations", registrations);
+    var modData = new Dictionary<string, string> { { "reallife:careers", resavedWithout }, { "hardmodepatch:factory_diplomas_held", held } };
+    Set(save, "modData", modData);
+    bool OnLoaded() => (bool)gateType.GetMethod("OnGameLoaded", Any).Invoke(null, new[] { save });
+    Check(OnLoaded() && modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "reviewed RLO with courses registered: held records given back, hold kept until RLO saves");
+    var given = Read(modData["reallife:careers"]);
+    Check(((IList)Get(given, "Courses")).Count == 2 && (int)Get(((IList)Get(given, "Courses"))[0], "Course") == 19
+        && (bool)given.GetType().GetMethod("Holds").Invoke(given, new object[] { 18 })
+        && (bool)given.GetType().GetMethod("Holds").Invoke(given, new object[] { 10 }) && (long)Get(given, "LoanCents") == 123456L,
+        "RLO's own reader takes the given-back course and result, ordinary records unchanged");
+    modData["reallife:careers"] = (string)Rlo("CareersStore", "Write", given);
+    Check(OnLoaded() && !modData.ContainsKey("hardmodepatch:factory_diplomas_held"), "after RLO has saved them the hold is cleared");
+    Check(!OnLoaded(), "nothing held: the careers record is left alone");
     var holdsBridge = bridge.GetField("holds", Any);
     var savedHolds = holdsBridge.GetValue(null);
     holdsBridge.SetValue(null, null);
     Check(Denied("ba:itemname_kilnmachine") == null && (bool)bridge.GetField("failed", Any).GetValue(null), "reflection failure opens the sale and latches the bridge off");
     holdsBridge.SetValue(null, savedHolds);
     singleton.SetValue(null, null);
-    Check(!(bool)Call("Reviewed", patch), "unreviewed assembly identity rejected");
+    var accepts = gateType.GetMethod("Accepts");
+    Check(!(bool)accepts.Invoke(null, new object[] { patch }) && (bool)gateType.GetProperty("Refused").GetValue(null), "unreviewed assembly identity rejected");
+    Check((bool)accepts.Invoke(null, new object[] { rlo }) && !(bool)gateType.GetProperty("Refused").GetValue(null), "reviewed RLO accepted");
     bridge.GetField("failed", Any).SetValue(null, true);
     Check(Denied("ba:itemname_kilnmachine") == null, "bridge fault latches gate off");
     bridge.GetField("failed", Any).SetValue(null, false);

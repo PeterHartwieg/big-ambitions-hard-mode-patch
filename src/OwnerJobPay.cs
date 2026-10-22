@@ -8,8 +8,8 @@ namespace HardModePatch
 {
     // Our own balance rule: Real Life Overhaul pays every job and gig 15% less for each business the player runs
     // (CareerCatalogue.OwnerFactor, never under 55%). With the rule on, that factor is 1: the player's own labour
-    // pays the same whether or not they own a business. RLO is patched by name once its assembly is loaded; if
-    // OwnerFactor(int) is not there as reviewed in RLO 0.40.1 to 0.40.6, nothing is patched and the cut stays.
+    // pays the same whether or not they own a business. RLO is patched by name once its assembly is loaded, only in a
+    // reviewed RLO build (RloGate); if OwnerFactor(int) is not there as reviewed, nothing is patched and the cut stays.
     public static class OwnerJobPay
     {
         static readonly Harmony harmony = new Harmony(HardModePatchMod.HarmonyId + ".ownerpay");
@@ -37,7 +37,8 @@ namespace HardModePatch
 
         static void TryPatch(Assembly assembly)
         {
-            if (patched || assembly == null || assembly.GetName().Name != "RealLifeOverhaul") return;
+            if (patched || assembly == null || assembly.GetName().Name != Targets.RealLifeOverhaul.AssemblyName) return;
+            if (!RloGate.Accepts(assembly)) { patched = true; return; }
             try
             {
                 var type = assembly.GetType("RealLifeOverhaul.CareerCatalogue");

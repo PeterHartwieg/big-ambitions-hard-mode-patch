@@ -64,6 +64,7 @@ namespace HardModePatch
             if (!HappinessRebalance.Available) options.AddHeader("hardmode_happiness_unavailable");
             options.AddSplitter().AddHeader("hardmode_ownerpay_header");
             AddRule(options, Rules.OwnerJobFullPay);
+            if (!OwnerJobPay.Available) options.AddHeader("hardmode_ownerpay_unavailable");
             options.AddSplitter().AddHeader("hardmode_runningcosts_header");
             AddRule(options, Rules.EquipmentUtilities);
             AddRule(options, Rules.OfficeIt);
@@ -103,6 +104,7 @@ namespace HardModePatch
                 case TargetState.Verified: return "hardmode_state_verified";
                 case TargetState.Unverified: return "hardmode_state_unverified";
                 case TargetState.Incompatible: return "hardmode_state_incompatible";
+                case TargetState.Refused: return "hardmode_state_refused";
                 default: return "hardmode_state_missing";
             }
         }

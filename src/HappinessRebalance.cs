@@ -192,6 +192,8 @@ namespace HardModePatch
             {
                 hotelLookupDone = true;
                 var type = AccessTools.TypeByName("RealLifeOverhaul.TravelState");
+                // An unreviewed RLO build: RloGate has said so once; 'no home' keeps the game's value.
+                if (type != null && !RloGate.Accepts(type.Assembly)) return false;
                 var getter = type == null ? null : AccessTools.PropertyGetter(type, "HasRoom");
                 if (getter != null && getter.IsStatic && getter.ReturnType == typeof(bool))
                     hotelBooked = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), getter);
