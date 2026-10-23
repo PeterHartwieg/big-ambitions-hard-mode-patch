@@ -184,3 +184,7 @@ Review round 3 (all three "fix", same finding): a new HMP enrolment while the ho
 Review round 4: Opus approved. Astra and Sol found that identical held records (two same-day withdrawals) were matched as a set, so one line copy cleared both; now matched one for one. Astra's stranded-hold case (two held enrolments of one course) and Opus's re-enrolled-course nit are documented open items in [RLO compatibility](rlo-compatibility.md). Checks: 158 core tests.
 
 Review round 5: Opus 5.5, GPT 6 Astra and GPT 6.1 Sol all approve (049f085), with wording nits on the open items, applied.
+
+## Utility closure descriptions (23 October 2026)
+
+`UtilityClosureReasonPatch` post-processes the game's `TasksUI.GetTodoDescription` for the generic business-closed alert. Default-on option `utility_closure_reasons`; pure reason mapping and expiry policy in `Core/UtilityClosureReason`. Reviewed RLO 0.49.0 only, with shape checks for every read field. The adapter requires the current loaded, enabled, healthy UtilitiesDirector, a player-held closed registration, an unexpired Utilities-owned closure and a recognized recorded reason. It preserves the business-name prefix and another mod's specific message. No save/account/task/closure mutations.

@@ -63,3 +63,7 @@ Offline checks against the 0.49.0 DLL, all passing: HookCheck 10/10 RLO members 
 ## Upstream
 
 The data loss on an unknown course id is RLO's reader dropping records it can't place. A PR description for RLO to keep them is in [rlo-upstream-unknown-course-records.md](rlo-upstream-unknown-course-records.md); it isn't opened.
+
+## Utility closure presentation review (23 October 2026)
+
+The new display adapter is separately restricted to the exact reviewed 0.49.0 hash prefix `4f82b4f88f919178`; 0.45.0's existing features remain supported, but its closure presentation is unchanged. Reviewed against the released DLL: `UtilitiesDirector.Instance`, `_save`, `_loaded`, `_failed`, `_toldClosed`; `Settings.Utilities`; `BusinessState.Closures`; `Closure.Place/Day/Hour/Source`, with `ClosureSource.Utilities = 1`. `BusinessState.PlaceKey` matches the existing escaped street/number key. `TellClosed` records recognized reasons only after `BusinessDirector.CloseFor` accepts utility ownership; manual closures are refused, and utility ownership can coexist with an issue. Release, expiry, disabled utilities, a failed director and another save must not inherit a stale description. The game hook is `TasksUI.GetTodoDescription(TodoTask, bool)`; only its generic alert key is replaced. Native field/guard regression checks are in CostCheck; unknown-hash refusal is in RloGateCheck.

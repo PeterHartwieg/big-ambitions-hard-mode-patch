@@ -19,6 +19,7 @@ Standalone house rules start off. The series button enables the following rules 
 [h2]Fixes for other mods[/h2]
 On by default, each only when that mod is installed:
 [list]
+[*][b]RLO utility closure reasons[/b]: BizMan explains pending internet installation, outages and utility supply problems when reviewed RLO 0.49.0 owns the closure. Display only; manual closures and unknown reasons keep the game's message.
 [*][b]Bakery[/b]: prices at the game's own bakery margins.
 [*][b]POLYMODS HYPERREAL[/b]: resets exposure history after you close the city map, aimed at the dark evening screen some players see then.
 [*][b]Internet Cafe[/b]: at most two customers per PC per hour while you're away.
@@ -33,7 +34,7 @@ Other mods update on their own schedule. If one changes the code a fix relies on
 
 [h2]Good to know[/h2]
 [list]
-[*]First Workshop release. Earlier Mac integration checked settings, the indebted start, midnight and save/reload. Running-cost balance, native UI and Windows/Workshop acceptance still need playtesting.
+[*]First Workshop release. Earlier Mac integration checked settings, the indebted start, midnight and save/reload. Windows checks cover utility billing and the specific BizMan closure alert. Staffed-business balance at series settings and Workshop installation still need acceptance.
 [*]Performance changes live in City Performance, not here.
 [*]Back up a save you care about before loading it with new mods.
 [*]Lines starting [HART. Mode Patch] (the old name) in Player.log (%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions) show what the mod did and why.

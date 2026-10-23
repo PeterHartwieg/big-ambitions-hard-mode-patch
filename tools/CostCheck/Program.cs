@@ -187,7 +187,77 @@ SetRule("OfficeIt", true);
 Check(Needs("ba:businesstype_lawfirm") && Needs("ba:businesstype_importexport") && Needs("ba:businesstype_headquarters"), "rule on: every office type needs a connection");
 Check(Needs("reallife:businesstype_softwarestudio") && !Needs("ba:businesstype_fastfoodrestaurant"), "RLO's tech firms still need one, shops still don't");
 
+// Read-only utility closure presentation, using native data shapes and the real Harmony hook.
+new Harmony("costcheck.logs").Patch(patch.GetType("HardModePatch.Log", true).GetMethod("Warn", Any), prefix: new HarmonyMethod(typeof(CheckLog), nameof(CheckLog.Prefix)));
+var closurePatch = patch.GetType("HardModePatch.UtilityClosureReasonPatch", true);
+var closureHooks = (IList<MethodBase>)closurePatch.GetMethod("ResolveHooks").Invoke(null, new object[] { rlo });
+Check(closureHooks.Count == 2 && closureHooks.All(h => h != null), "closure presentation resolves game method, RLO getter and field contracts");
+closurePatch.GetMethod("TryPatch", Any).Invoke(null, new object[] { rlo });
+Check((bool)closurePatch.GetProperty("Available").GetValue(null) && Harmony.GetPatchInfo(closureHooks[0]).Owners.Contains("hardmodepatch.closurereason"), "closure description postfix installs on reviewed RLO");
+var director = Empty(U("UtilitiesDirector"));
+Set(director, "_save", save); Set(director, "_loaded", true); Set(director, "_failed", false);
+var reasonBook = new Dictionary<string, string>();
+string officeKey = Key(office);
+reasonBook[officeKey] = "reallife_util_closed_net_install";
+Set(director, "_toldClosed", reasonBook);
+var instanceField = U("UtilitiesDirector").GetField("<Instance>k__BackingField", Any);
+instanceField.SetValue(null, director);
+var utilEnabled = rlo.GetType("RealLifeOverhaul.Settings", true).GetField("Utilities", Any);
+utilEnabled.SetValue(null, true);
+var closureList = (IList)rlo.GetType("RealLifeOverhaul.BusinessState", true).GetField("Closures").GetValue(null);
+var closureType = rlo.GetType("RealLifeOverhaul.Closure", true);
+object closure = Activator.CreateInstance(closureType);
+Set(closure, "Place", officeKey); Set(closure, "Day", 9); Set(closure, "Hour", 2); Set(closure, "Source", 1);
+closureList.Clear(); closureList.Add(closure);
+Set(save, "Day", 9); Set(save, "Hour", 0); Set(office, "temporarilyClosed", true);
+var taskType = game.GetType("Entities.TodoTask", true);
+object task = Activator.CreateInstance(taskType);
+Set(task, "type", Enum.Parse(taskType.GetField("type").FieldType, "BusinessTemporarilyClosed"));
+object address = Empty(taskType.GetField("address").FieldType);
+Set(address, "streetName", Get(office, "StreetName")); Set(address, "streetNumber", Get(office, "StreetNumber"));
+Set(task, "address", address);
+var holderType = ((MethodInfo)closureHooks[0]).ReturnType;
+var postfix = closurePatch.GetMethod("Postfix", Any);
+string Description(string original = "alert_business_temporarily_closed")
+{
+    object holder = Activator.CreateInstance(holderType);
+    Set(holder, "Key", original); Set(holder, "Prefix", "Office: ");
+    object[] call = { task, holder };
+    postfix.Invoke(null, call);
+    Check((string)Get(call[1], "Prefix") == "Office: ", "description preserves native business prefix");
+    return (string)Get(call[1], "Key");
+}
+const string generic = "alert_business_temporarily_closed";
+Check(Description() == "hardmode_closed_net_install", "owned pending-internet closure gets specific label");
+SetRule("UtilityClosureReasons", false);
+Check(Description() == generic, "closure option off preserves original");
+SetRule("UtilityClosureReasons", true);
+Check(Description("another_mod_reason") == "another_mod_reason", "another mod's specific description is not overwritten");
+Set(closure, "Source", 0); closureList[0] = closure;
+Check(Description() == generic, "business issue without utility ownership is not relabelled");
+Set(closure, "Source", 1); Set(closure, "Hour", 0); closureList[0] = closure;
+Check(Description() == generic, "expired utility closure does not leak cached reason");
+Set(closure, "Hour", 2); closureList[0] = closure;
+Set(director, "_save", Empty(gameType));
+Check(Description() == generic, "previous save's director is ignored");
+Set(director, "_save", save); Set(director, "_failed", true);
+Check(Description() == generic, "failed utility director is ignored");
+Set(director, "_failed", false); utilEnabled.SetValue(null, false);
+Check(Description() == generic, "disabled RLO utilities retain generic message");
+utilEnabled.SetValue(null, true); Set(office, "temporarilyClosed", false);
+Check(Description() == generic, "reopened business does not retain a reason");
+Set(office, "temporarilyClosed", true); reasonBook[officeKey] = "unknown_future_reason";
+Check(Description() == generic, "unknown reason keeps the original description");
+closureList.Clear(); instanceField.SetValue(null, null);
+closurePatch.GetMethod("Stop").Invoke(null, null);
+Check(Harmony.GetPatchInfo(closureHooks[0]) == null || !Harmony.GetPatchInfo(closureHooks[0]).Owners.Contains("hardmodepatch.closurereason"), "Stop removes closure presentation hook");
+
 costs.GetMethod("Stop").Invoke(null, null);
 Check(hooks.Take(3).All(h => Harmony.GetPatchInfo(h) == null || !Harmony.GetPatchInfo(h).Owners.Contains("hardmodepatch.runningcosts")), "Stop removes every patch");
 Console.WriteLine($"ALL {checks} COST CHECKS PASSED (offline; RLO's nightly books, the Utilities app and real saves remain unverified)");
 return 0;
+
+static class CheckLog
+{
+    public static bool Prefix(string message) { Console.WriteLine("ADAPTER: " + message); return false; }
+}

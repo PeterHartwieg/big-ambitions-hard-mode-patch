@@ -149,3 +149,7 @@ Rules and target versions without game code live in `Core/` and are covered by t
 ## Licence
 
 MIT, see [LICENSE.txt](LICENSE.txt). Harmony is MIT, and its licence ships in `Dependencies\`. The patched mods belong to their authors; this repository contains none of their code.
+
+## Utility closure reasons (0.5.0)
+
+The default-on **Show RLO's utility closure reason in BizMan** option replaces the generic closure alert with the specific utility problem, such as pending internet installation. It also updates the same alert in the task list. It reads RLO 0.49.0's current closure ownership and recorded reason; manual closures, other business issues without a utility closure, expired records and unknown reasons keep the original text. It does not change accounts, closure decisions, tasks or saves. After loading a save, the generic message can remain until RLO's next hourly refresh records the reason. Other reviewed RLO versions retain the original message until this adapter is separately reviewed. Native acceptance is recorded in `docs/windows-rig3-2026-10-23.md`.

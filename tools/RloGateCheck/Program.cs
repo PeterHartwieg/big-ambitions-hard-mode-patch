@@ -50,6 +50,11 @@ var costHooks = (IList<MethodBase>)costs.GetMethod("ResolveHooks").Invoke(null, 
 Check(costHooks.All(h => h != null), "the unreviewed build still has every member the running costs touch");
 costs.GetMethod("TryPatch", Any).Invoke(null, new object[] { rlo });
 Check(!(bool)costs.GetProperty("Available").GetValue(null) && !costHooks.Take(3).Any(Patched), "running costs leave RLO's bills unpatched");
+var closure = P("UtilityClosureReasonPatch");
+var closureHooks = (IList<MethodBase>)closure.GetMethod("ResolveHooks").Invoke(null, new object[] { rlo });
+Check(closureHooks.All(h => h != null), "unreviewed RLO still has the utility closure field and method shapes");
+closure.GetMethod("TryPatch", Any).Invoke(null, new object[] { rlo });
+Check(!(bool)closure.GetProperty("Available").GetValue(null) && !Patched(closureHooks[0]), "unreviewed RLO leaves the game's closure description unchanged");
 var pay = P("OwnerJobPay");
 pay.GetMethod("TryPatch", Any).Invoke(null, new object[] { rlo });
 var ownerFactor = rlo.GetType("RealLifeOverhaul.CareerCatalogue", true).GetMethod("OwnerFactor", new[] { typeof(int) })!;

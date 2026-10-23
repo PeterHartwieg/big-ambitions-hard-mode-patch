@@ -72,6 +72,7 @@ namespace HardModePatch
             options.AddSplitter().AddHeader("hardmode_runningcosts_header");
             AddRule(options, Rules.EquipmentUtilities);
             AddRule(options, Rules.OfficeIt);
+            AddRule(options, Rules.UtilityClosureReasons);
             if (!RunningCostsPatch.Available) options.AddHeader("hardmode_runningcosts_unavailable");
             foreach (var target in Rules.All.Where(r => r.Target != null).Select(r => r.Target).Distinct())
             {

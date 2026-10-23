@@ -32,6 +32,7 @@ namespace HardModePatch
                 HappinessRebalance.Start();
                 OwnerJobPay.Start();
                 RunningCostsPatch.Start();
+                UtilityClosureReasonPatch.Start();
                 patcher = new Patcher(new Harmony(HarmonyId), new ITargetPatch[]
                 {
                     new HardcoreAmbitionsPatch(), new MeaningfulAmbiencePatch(), new BakeryPatch(),
@@ -53,6 +54,7 @@ namespace HardModePatch
                 HappinessRebalance.Stop();
                 OwnerJobPay.Stop();
                 RunningCostsPatch.Stop();
+                UtilityClosureReasonPatch.Stop();
                 patcher = null;
             }
             return Task.FromResult(0);
@@ -69,6 +71,7 @@ namespace HardModePatch
             HappinessRebalance.Stop();
             OwnerJobPay.Stop();
             RunningCostsPatch.Stop();
+            UtilityClosureReasonPatch.Stop();
             patcher = null;
             return Task.FromResult(0);
         }

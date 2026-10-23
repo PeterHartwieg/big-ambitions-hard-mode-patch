@@ -51,6 +51,8 @@ namespace HardModePatch.Core
         // Null target: our own running costs on RLO's utilities (Core/RunningCosts). Off by default; the HART pack turns them on.
         public static readonly Rule EquipmentUtilities = new Rule("equipment_utilities", null, false);
         public static readonly Rule OfficeIt = new Rule("office_it", null, false);
+        // Presentation only, on by default. It never changes the closure decision.
+        public static readonly Rule UtilityClosureReasons = new Rule("utility_closure_reasons", null, true);
 
         // Null target: the custom game screen opens with the HART series values (Core/SeriesSettings.NewGame). On by
         // default: it only fills in the screen, and the player can change every value before starting.
@@ -90,7 +92,7 @@ namespace HardModePatch.Core
             IndebtedScenario,
             RentRebalance,
             HappinessRebalance,
-            OwnerJobFullPay, EquipmentUtilities, OfficeIt, FactoryDiplomas,
+            OwnerJobFullPay, EquipmentUtilities, OfficeIt, UtilityClosureReasons, FactoryDiplomas,
             HardcoreKeepDifficulty, HardcoreNoFunds, HardcoreVehiclePricesPerSave,
             AmbienceScalesWithDemand,
             BakeryVanillaMargins,

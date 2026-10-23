@@ -1,4 +1,11 @@
 {
+  "hardmode_utility_closure_reasons": "Show RLO's utility closure reason in BizMan",
+  "hardmode_closed_net_install": "Temporarily closed: internet installation pending",
+  "hardmode_closed_net_none": "Temporarily closed: an active internet plan is required",
+  "hardmode_closed_net_outage": "Temporarily closed: internet outage",
+  "hardmode_closed_connecting": "Temporarily closed: utility connection pending",
+  "hardmode_closed_cut": "Temporarily closed: utility supply cut for unpaid bills",
+  "hardmode_closed_apply": "Temporarily closed: utility supply must be arranged",
   "hardmode_title": "HART. Mod Pack Patch",
   "hardmode_series_header": "HART series settings",
   "hardmode_series_apply": "Apply HART series settings",

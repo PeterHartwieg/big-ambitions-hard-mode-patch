@@ -2,6 +2,7 @@
 
 ## 0.5.0 (22 October 2026), first Workshop release
 
+- BizMan now shows RLO utility closure reasons, including pending internet installation, instead of only “temporarily closed”. This default-on display option leaves closure and billing rules unchanged; unsupported or unknown reasons keep the original message.
 - First Workshop release as HART. Mod Pack Patch, the companion to HART. Mod Pack.
 - Apply HART series settings enables Economy Expansion-inspired running costs on Real Life Overhaul: equipment and opening hours affect power and water; offices need internet and pay $150 per computer each game month.
 - The series button explicitly switches off the former flat 2x/3x rent increase. Existing signed leases keep their stored rent; the rent multiplier remains a separate optional rule.
@@ -16,7 +17,7 @@
 
 Defaults: the indebted start, rent, happiness, owner job pay, running costs and factory diplomas stay off until you turn them on or press the button. The patches for other mods stay on, and only act when those mods are installed.
 
-Checked offline only: 158 core tests and the hook, scenario, factory, cost, compatibility, RLO gate and settings checks against the game's and the mods' DLLs. Nothing in this version has run in the game yet.
+Checked: 170 core tests plus the full hook, scenario, factory, cost, compatibility, RLO gate and settings suite. Native Windows checks cover billing and utility closure descriptions; staffed-business balance at series settings remains unassessed. See `docs/windows-rig3-2026-10-23.md`.
 
 ## Earlier versions
 
