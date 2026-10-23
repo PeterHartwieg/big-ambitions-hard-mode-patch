@@ -12,7 +12,7 @@ CHANGELOG="$(sed -nE 's/^## ([0-9][^ ]*) .*/\1/p' "$REPO/CHANGELOG.md" | head -1
 "$REPO/tools/build.sh" >/dev/null
 OUT="$REPO/build/HardModePatch"
 # The Mod Creator uses the first image in the mod folder's root as the Workshop thumbnail.
-[ -f "$REPO/workshop/preview.jpg" ] && cp "$REPO/workshop/preview.jpg" "$OUT/preview.jpg"
+cp "$REPO/workshop/preview.png" "$OUT/preview.png"
 cd "$REPO/build"
 (cd HardModePatch && find . -type f | sed 's|^\./||' | LC_ALL=C sort | xargs shasum -a 256) > HardModePatch.sha256
 ZIP="HardModePatch-$VERSION.zip"

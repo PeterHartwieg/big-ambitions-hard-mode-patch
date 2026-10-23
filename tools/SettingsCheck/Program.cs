@@ -69,11 +69,11 @@ Check(entries.Contains("Dynamic Rivals") && entries.Contains("C:/ModsLocal/HARTR
 var preview = ((IEnumerable<string>)P("SeriesSettingsButton").GetMethod("Preview")!.Invoke(null, null)!).ToList();
 foreach (var line in preview) Console.WriteLine("  " + line);
 string Line(string owner, string id) => preview[rows.FindIndex(r => r.Owner == owner && r.Id == id)];
-Check(Line("HARTRivalBalance", "rival_preset") == "HART Rival Balance rival_preset -> m:C:/ModsLocal/HARTRivalBalance:rival_preset = 1", "Rival Balance: rival_preset found by owner and id, written to Normal");
+Check(Line("HARTRivalBalance", "rival_preset") == "HART. Thriving Rivals rival_preset -> m:C:/ModsLocal/HARTRivalBalance:rival_preset = 1", "Rival Balance: rival_preset found by owner and id, written to Normal");
 foreach (var r in rows.Where(r => r.Owner == "DynamicRivals"))
     Check(Line(r.Owner, r.Id) == "Dynamic Rivals " + r.Id + " -> m:Dynamic Rivals:" + r.Id + " = " + r.Value, "Dynamic Rivals: " + r.Id + " = " + r.Value);
 foreach (var r in rows.Where(r => r.Owner == "HardModePatch"))
-    Check(Line(r.Owner, r.Id) == "HART. Mode Patch " + r.Id + " -> m:3830000000:" + r.Id + " = 1", "HMP: " + r.Id + " on");
+    Check(Line(r.Owner, r.Id) == "HART. Mod Pack Patch " + r.Id + " -> m:3830000000:" + r.Id + " = 1", "HMP: " + r.Id + " on");
 Check(rows.Where(r => r.Owner == "RealLifeOverhaul").All(r => Line(r.Owner, r.Id).EndsWith("skipped, Real Life Overhaul isn't loaded or has no options")), "RLO not registered here: every RLO value is skipped and named, nothing guessed");
 var drPage = entries["Dynamic Rivals"]!;
 var drOptions = (IEnumerable)drPage.GetType().GetProperty("Options")!.GetValue(drPage)!;
