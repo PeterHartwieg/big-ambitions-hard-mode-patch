@@ -4,7 +4,7 @@ The HART. Mod Pack's companion mod. Formerly HART. Mode Patch (until 23 October 
 
 A Big Ambitions mod for the HART. Group series pack: the series settings in one button, an optional indebted starting scenario, our own balance rules on Real Life Overhaul, and runtime patches that make other Workshop mods fit together. Every change has an option under Settings > Mods. The scenario and our own rules are off by default; with them off and no target mod installed, the only change is the custom game screen opening with the series values, and that has its own switch.
 
-**Status:** 0.5.0, the first Workshop release, paired with City Performance 0.5.0. Checked offline only; nothing in 0.5.0 has run in the game yet. See [CHANGELOG.md](CHANGELOG.md).
+**Status:** 0.5.0, the first Workshop release, paired with City Performance 0.5.0. The prior Mac integration checked series settings, the indebted start, midnight and save/reload. Current running-cost and Windows acceptance remain separate checks. See [CHANGELOG.md](CHANGELOG.md).
 
 HART. Mod Pack Patch owns mod compatibility and the pack's intended mechanics: the series settings, prices, the scenario, rent, happiness, running costs, factory diplomas and the Hyperreal map return. City Performance owns every performance change; Bakery's Help discovery and Hyperreal's lamp search moved there in 0.4.2 ([the handoff](docs/performance-ownership.md)).
 
@@ -29,7 +29,7 @@ This addresses the leading hypothesis for Peter's 19 October report of darkness 
 
 The workaround retains its exact reviewed Hyperreal/game/Unity/HDRP binary requirements. Unknown binaries leave Hyperreal unpatched. `Player.log` records `Hyperreal map return: reset exposure history...` once when it acts. Loading another save restores the map-close subscription; scene changes, game-event initialization, Hyperreal reset and option changes cancel pending returns.
 
-## Rent rebalance
+## Optional rent rebalance (outside the HART preset)
 
 With **Flats at twice and shops at three times the market rent** on (Settings > Mods, off by default), every lease you sign costs twice the market rent for a flat and three times for any other building. Deposits keep the game's usual number of days, so they rise with the rent; leases already signed keep their rent. Rivals' estimated income keeps the game's rent, so rival survival and the Rivals leaderboard don't change.
 
@@ -37,9 +37,11 @@ With **Flats at twice and shops at three times the market rent** on (Settings > 
 
 With **Home activities bank up to four days…** on (Settings > Mods, off by default), home activities give a smaller boost that banks up to four days, so home tops out around 60. Outside activities (cinema, theatre, golf, tennis, casino, swimming, clubs, the pier, walks) give their boost for 4 to 7 days from one visit, so reaching 100 takes a mix of them. "No home" counts −15 instead of −50 while Real Life Overhaul has a hotel room booked for you. Other mods' happiness effects are unchanged.
 
-## Running costs (awaiting playtest)
+## Economy Expansion running costs
 
-Two options under **Running costs**, both off by default, for Real Life Overhaul's utilities. They bring back the two Economy Expansion pressures RLO doesn't have. Without RLO, on an RLO version this mod hasn't reviewed, or when a patched RLO member is renamed or its signature changes, nothing is patched and RLO's own bills stand.
+The HART series button enables `equipment_utilities` and `office_it` and explicitly disables `rent_rebalance`. The pack uses running costs instead of the flat 2x/3x rent increase; already-signed leases keep their stored rent. Economy Expansion itself is not a dependency. See [the decision](docs/series-settings.md#economy-expansion-decision-23-october-2026).
+
+Two options under **Running costs**, both off by default for standalone use, for Real Life Overhaul's utilities. They bring back the two Economy Expansion pressures RLO doesn't have. Without RLO, on an RLO version this mod hasn't reviewed, or when a patched RLO member is renamed or its signature changes, nothing is patched and RLO's own bills stand.
 
 **Appliances and opening hours** (`equipment_utilities`). RLO bills a business's power and water by floor area and business kind, the same for a 2-hour and a 24-hour day. With this on, that floor figure follows the hours open: 12 hours keep RLO's figure, 24 hours cost 1.75 times as much, and a closed day keeps RLO's quarter. Cooking, machines and IT add their own draw while open: a fryer averages 5 kW, a grill 4 kW, a pizza oven 6 kW, factory machines 3 to 40 kW. RLO's closed-day quarter is its allowance for fridges and alarms, so placed fridges, freezers and alarms replace it when they draw more, open or not. RLO's water rate is the kind's basins, so placed sinks, showers, dishwashers and toilets replace its open-hours water when they use more. At RLO's start prices (15¢ a kWh), a 100 m² burger bar with two fryers, two grills, two fridges, a freezer and a drinks fridge pays about $37 a day more for power when open 12 hours, and about $79 more when open 24. Homes keep RLO's bill. The bill, its due day, late fee and cut stay RLO's.
 

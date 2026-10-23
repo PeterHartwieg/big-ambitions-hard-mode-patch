@@ -1,5 +1,8 @@
 # HART. Mod Pack Patch 0.5.0
 
-Apply HART series settings from the Mods menu and start a new custom game with the series values prefilled. Adds reviewed Real Life Overhaul 0.49.0 support and compatibility fixes; performance improvements are handled by City Performance.
-
-Now named HART. Mod Pack Patch, with its own Workshop thumbnail. The series button uses the new HART. Thriving Rivals name.
+- First Workshop release as HART. Mod Pack Patch, the companion to HART. Mod Pack.
+- Apply HART series settings enables Economy Expansion-inspired running costs on Real Life Overhaul: equipment and opening hours affect power and water; offices need internet and pay $150 per computer each game month.
+- The series button explicitly switches off the former flat 2x/3x rent increase. Existing signed leases keep their stored rent; the rent multiplier remains a separate optional rule.
+- One button applies the series options; New game > Custom opens with the series values.
+- Supports reviewed RLO 0.49.0. Unreviewed RLO versions pause the RLO features and preserve diploma progress.
+- Performance changes belong to City Performance 0.5.0. Restart after updating.

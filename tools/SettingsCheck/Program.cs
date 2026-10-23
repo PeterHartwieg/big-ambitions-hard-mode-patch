@@ -73,7 +73,7 @@ Check(Line("HARTRivalBalance", "rival_preset") == "HART. Thriving Rivals rival_p
 foreach (var r in rows.Where(r => r.Owner == "DynamicRivals"))
     Check(Line(r.Owner, r.Id) == "Dynamic Rivals " + r.Id + " -> m:Dynamic Rivals:" + r.Id + " = " + r.Value, "Dynamic Rivals: " + r.Id + " = " + r.Value);
 foreach (var r in rows.Where(r => r.Owner == "HardModePatch"))
-    Check(Line(r.Owner, r.Id) == "HART. Mod Pack Patch " + r.Id + " -> m:3830000000:" + r.Id + " = 1", "HMP: " + r.Id + " on");
+    Check(Line(r.Owner, r.Id) == "HART. Mod Pack Patch " + r.Id + " -> m:3830000000:" + r.Id + " = " + r.Value, "HMP: " + r.Id + " = " + r.Value);
 Check(rows.Where(r => r.Owner == "RealLifeOverhaul").All(r => Line(r.Owner, r.Id).EndsWith("skipped, Real Life Overhaul isn't loaded or has no options")), "RLO not registered here: every RLO value is skipped and named, nothing guessed");
 var drPage = entries["Dynamic Rivals"]!;
 var drOptions = (IEnumerable)drPage.GetType().GetProperty("Options")!.GetValue(drPage)!;

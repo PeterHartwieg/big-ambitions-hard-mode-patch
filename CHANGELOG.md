@@ -2,6 +2,10 @@
 
 ## 0.5.0 (22 October 2026), first Workshop release
 
+- First Workshop release as HART. Mod Pack Patch, the companion to HART. Mod Pack.
+- Apply HART series settings enables Economy Expansion-inspired running costs on Real Life Overhaul: equipment and opening hours affect power and water; offices need internet and pay $150 per computer each game month.
+- The series button explicitly switches off the former flat 2x/3x rent increase. Existing signed leases keep their stored rent; the rent multiplier remains a separate optional rule.
+
 - New name: HART. Mod Pack Patch, formerly Hard Mode Patch. The DLL, the mod folder and the option IDs keep the old `HardModePatch` name, so settings and saves carry over.
 - New button: **Apply HART series settings**. It sets the HART series values in this mod, HART. Thriving Rivals, Dynamic Rivals and Real Life Overhaul, writes each change to `Player.log`, skips and lists anything it can't find, and asks for a restart. It runs only when you press it, and only at the main menu. See `docs/series-settings.md` for every value.
 - New toggle, on by default: **Prefill the custom game with the series settings**. The custom game screen opens with the series values (60 days a year, $0 starting money, tax 51%, rival attacks 150% and the rest); you can change any of them before starting.

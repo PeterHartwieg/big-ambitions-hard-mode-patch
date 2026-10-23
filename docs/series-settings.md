@@ -1,6 +1,6 @@
 # Series settings
 
-HART. Mode Patch carries the settings the HART series plays with, so a viewer can set up the same game. Two parts, both under Settings > Mods > HART. Mode Patch > HART series settings. The values are in one table, `Core/SeriesSettings.cs`, covered by `tests/SeriesSettingsTests.cs` and `tools/SettingsCheck`.
+HART. Mod Pack Patch carries the settings the HART series plays with, so a viewer can set up the same game. Two parts, both under Settings > Mods > HART. Mod Pack Patch > HART series settings. The values are in one table, `Core/SeriesSettings.cs`, covered by `tests/SeriesSettingsTests.cs` and `tools/SettingsCheck`.
 
 ## Apply HART series settings (button)
 
@@ -14,14 +14,14 @@ Undecided rows of the RLO triage keep RLO's default, and so does every option no
 
 | Mod | Option ID | Writes | Default | Why |
 | --- | --- | ---: | --- | --- |
-| HART. Mode Patch | `scenario_indebted_start` | 1 | 0 | series start: $551.37 cash and the $75,454.35 loan |
-| HART. Mode Patch | `rent_rebalance` | 1 | 0 | series rule |
-| HART. Mode Patch | `happiness_rebalance` | 1 | 0 | series rule |
-| HART. Mode Patch | `owner_job_full_pay` | 1 | 0 | series rule |
-| HART. Mode Patch | `factory_diplomas` | 1 | 0 | series rule |
-| HART. Mode Patch | `equipment_utilities` | 1 | 0 | series rule |
-| HART. Mode Patch | `office_it` | 1 | 0 | series rule |
-| HART Rival Balance | `rival_preset` | 1 | 1 | preset Normal (0 Easy, 1 Normal, 2 Hard) |
+| HART. Mod Pack Patch | `scenario_indebted_start` | 1 | 0 | series start: $551.37 cash and the $75,454.35 loan |
+| HART. Mod Pack Patch | `rent_rebalance` | 0 | 0 | running costs replace the flat rent multiplier |
+| HART. Mod Pack Patch | `happiness_rebalance` | 1 | 0 | series rule |
+| HART. Mod Pack Patch | `owner_job_full_pay` | 1 | 0 | series rule |
+| HART. Mod Pack Patch | `factory_diplomas` | 1 | 0 | series rule |
+| HART. Mod Pack Patch | `equipment_utilities` | 1 | 0 | series rule |
+| HART. Mod Pack Patch | `office_it` | 1 | 0 | series rule |
+| HART. Thriving Rivals | `rival_preset` | 1 | 1 | preset Normal (0 Easy, 1 Normal, 2 Hard) |
 | Dynamic Rivals | `wholesale_rival_count` | 0 | 0 | 7 (choices 7, 8, 10, 15, ...) |
 | Dynamic Rivals | `import_rival_count` | 1 | 1 | 8 |
 | Dynamic Rivals | `retail_occupancy` | 0 | 0 | Vanilla |
@@ -101,6 +101,12 @@ Left out on purpose:
 - `permadeath`: off by default, and RLO turns it off at the main menu itself. Writing it while a save is loaded would change that save.
 - City Performance options: City Performance owns them.
 
+## Economy Expansion decision, 23 October 2026
+
+The button explicitly switches `rent_rebalance` off and enables `equipment_utilities` and `office_it`. These Economy Expansion-inspired pressures use RLO's billing: equipment and opening hours affect power/water, and offices need internet and pay IT per computer. Economy Expansion itself is not required or installed by the pack.
+
+We keep the optional 2x/3x rent rule unchanged for standalone users. Switching it off is clearer than leaving a rule named "twice/three times" on at a hidden 1x, and restores the game's market-rent path without that modifier. Reapplying the preset also turns off an older saved value of 1. Existing signed leases retain their stored rent; this is not a save migration. Difficulty, RLO and other mods can still affect the economy.
+
 ## Prefill the custom game with the series settings (toggle, on)
 
 A postfix on `UI.MainMenu.CustomGameOptionsHandler.Start` takes the preset the game just set (its first built-in preset), copies it, puts the series values on top and calls the screen's public `SetPreset(GameVariables)`. The main menu's `CustomGamePanel.Start` also selects the first preset, which calls `SetPreset` with it, and Unity may run the two Starts in either order, so a second postfix on the panel's Start applies the series values again when the panel has a start button (the in-game settings panel has none). The sliders pass their values on a frame later, in call order, so the last `SetPreset` stands. The player can change any value before starting. It does nothing when the screen's `preventAutoSetOnStart` is set. Every name is looked up at start; if the screen, `SetPreset`, `GetPreset` or any field below is missing or of another type, nothing is patched, the options page says so and the game's own preset stands.
@@ -122,7 +128,7 @@ A postfix on `UI.MainMenu.CustomGameOptionsHandler.Start` takes the preset the g
 | `exportMultiplier` | 0.1 |
 | `sellingMultiplier` | 0.5 (resale value) |
 
-Source: the series-2 campaign's recommended settings (Peter, 20 October), as the release plan lists them. The prefill is on by default, as the release plan asks, so anyone with HART. Mode Patch installed opens Custom with $0 starting money and these values, the indebted start on or not; the toggle switches it off. The slider limits live in the game's scene, not in code, so whether 2.0 urgent fees and 0.1 export fit the sliders is unverified; Episode 1's settings screen showed the urgent fees at 200%.
+Source: the series-2 campaign's recommended settings (Peter, 20 October), as the release plan lists them. The prefill is on by default, as the release plan asks, so anyone with HART. Mod Pack Patch installed opens Custom with $0 starting money and these values, the indebted start on or not; the toggle switches it off. The slider limits live in the game's scene, not in code, so whether 2.0 urgent fees and 0.1 export fit the sliders is unverified; Episode 1's settings screen showed the urgent fees at 200%.
 
 ## Comparing with the series PC
 

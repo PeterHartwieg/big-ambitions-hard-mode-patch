@@ -1,6 +1,6 @@
 # HART. Mod Pack Patch: Workshop upload
 
-Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). This folder is not part of the package, except `preview.jpg` once it exists. Nothing here has been uploaded. Nothing in 0.5.0 has run in the game yet: the release plan's integration run on `agentmac` and Peter's first-day check on a clean Windows profile come before or right after the upload.
+Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). This folder is not part of the package, except `preview.png`. Nothing here has been uploaded. Earlier Mac integration covered series settings, a new game, midnight and save/reload. Current release validation and remaining native checks are recorded in the release session 2 handoff.
 
 ## Fields
 
@@ -16,11 +16,11 @@ Called HART. Mode Patch until 23 October 2026. The name now says what the mod is
 
 **Version:** `0.5.0`. Package: `build/HardModePatch/`; archive: `build/HardModePatch-0.5.0.zip`, SHA-256 in `build/HardModePatch-0.5.0.zip.sha256`; file hashes: `build/HardModePatch.sha256`. `tools/package.sh` rebuilds all three.
 
-**Thumbnail:** `workshop/preview.png` (512x512), with six gallery cards in `workshop/cards/`. Sources and `render.sh` are in `workshop/art/`. The Mod Creator takes the first image in the mod folder's root, but `tools/package.sh` still copies `workshop/preview.jpg`, which is the old shared template. Export `preview.png` over `preview.jpg`, or point the script at the PNG, then rerun `tools/package.sh`.
+**Thumbnail:** `workshop/preview.png`, the only image in the package root. Approved artwork; the build script copies it automatically. Gallery cards stay outside the runtime package.
 
 **Required items (set on the Workshop page after upload):** none. Every part that needs another mod switches itself on only when that mod is loaded. HART. Mod Pack lists it as a member.
 
-**Bug reports:** open. There is no Discord channel for this mod yet; the description below has a `DISCORD-LINK` placeholder to replace or remove before upload.
+**Bug reports:** use the Workshop comments or discussion for the relevant item; no Discord invitation is configured here.
 
 **Donations:** the PayPal hosted button `Q8KVURCRBFLQN` covers all of Peter's Big Ambitions projects.
 
@@ -39,10 +39,10 @@ Under Settings > Mods > HART. Mod Pack Patch:
 [/list]
 
 [h2]Our own rules[/h2]
-All off until you turn them on or press the button:
+Standalone house rules start off. The series button enables the following rules and explicitly turns the separate rent multiplier off:
 [list]
 [*][b]Indebted start[/b]: a new game starts with $551 cash and a $75,454 student loan at a city bank. Your difficulty settings stay as you chose them.
-[*][b]Rent[/b]: leases you sign cost twice the market rent for a flat and three times for any other building. Rivals keep the game's rent.
+[*][b]Economy Expansion running costs[/b]: on RLO, equipment and opening hours shape utility bills. Every office needs internet and pays $150 per computer each game month, adjusted by RLO's price level. RLO handles bills, late fees and cuts. The series button disables the former flat 2x/3x rent increase; existing signed leases keep their stored rent. Economy Expansion itself is not required.
 [*][b]Happiness[/b]: home tops out around 60; cinema, golf, the beach and other outside activities carry you for days, so a mix of them beats a routine.
 [*][b]Real Life Overhaul[/b]: jobs pay in full when you run businesses, power and water follow your appliances and opening hours, offices need an internet connection and pay for their computers, and the sewing, kiln and polishing machines need a trade diploma from RLO's school.
 [/list]
@@ -64,30 +64,30 @@ Other mods update on their own schedule. If one changes the code a fix relies on
 
 [h2]Good to know[/h2]
 [list]
-[*]This is the first release. It has been checked against the game's and the other mods' code, but not yet played. Report anything odd.
+[*]First Workshop release. Earlier Mac integration checked settings, the indebted start, midnight and save/reload. Running-cost balance, native UI and Windows/Workshop acceptance still need playtesting.
 [*]Performance changes live in City Performance, not here.
 [*]Back up a save you care about before loading it with new mods.
 [*]Lines starting [HART. Mode Patch] (the old name) in Player.log (%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions) show what the mod did and why.
 [/list]
 
 [h2]Bug reports[/h2]
-Post bugs in [url=DISCORD-LINK]my Discord[/url], one post per problem. Include the mod version, your other mods and what happened, plus the [HART. Mode Patch] lines from Player.log.
+Post bugs in this item's Workshop comments or discussions, one post per problem. Include the mod version, your other mods and what happened, plus the [HART. Mode Patch] lines from Player.log.
 
 [h2]Support[/h2]
 The mod is free and stays free. If you'd like to say thanks, you can [url=https://www.paypal.com/donate/?hosted_button_id=Q8KVURCRBFLQN]support my Big Ambitions projects via PayPal[/url].
-
-Made for the HART. Group series. The full README ships with the mod.
 ```
 
 **Change note** (first upload):
 
 ```
-0.5.0: first Workshop release
+[b]HART. Mod Pack Patch 0.5.0[/b]
 
-- New: Apply HART series settings, one button for the series values in this mod, HART. Thriving Rivals, Dynamic Rivals and Real Life Overhaul.
-- New: the custom game screen opens with the series values (switch under Settings > Mods).
-- Real Life Overhaul 0.49.0 supported. On an RLO version this mod hasn't been checked against, its RLO features pause and your diploma progress is kept.
-- Performance changes moved to City Performance 0.5.0.
-
-Restart the game after updating.
+[list]
+[*]First Workshop release as HART. Mod Pack Patch, the companion to HART. Mod Pack.
+[*]Apply HART series settings enables Economy Expansion-inspired running costs on Real Life Overhaul: equipment and opening hours affect power and water; offices need internet and pay $150 per computer each game month.
+[*]The series button explicitly switches off the former flat 2x/3x rent increase. Existing signed leases keep their stored rent; the rent multiplier remains a separate optional rule.
+[*]One button applies the series options; New game > Custom opens with the series values.
+[*]Supports reviewed RLO 0.49.0. Unreviewed RLO versions pause the RLO features and preserve diploma progress.
+[*]Performance changes belong to City Performance 0.5.0. Restart after updating.
+[/list]
 ```

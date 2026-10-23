@@ -18,8 +18,13 @@ public class SeriesSettingsTests
     {
         var own = SeriesSettings.Options.Where(o => o.Owner == SeriesSettings.Self).ToList();
         Assert.All(own, o => Assert.Contains(Rules.All, r => r.Id == o.Id));
-        foreach (var rule in new[] { Rules.IndebtedScenario, Rules.RentRebalance, Rules.HappinessRebalance, Rules.OwnerJobFullPay, Rules.FactoryDiplomas, Rules.EquipmentUtilities, Rules.OfficeIt })
+        foreach (var rule in new[] { Rules.IndebtedScenario, Rules.HappinessRebalance, Rules.OwnerJobFullPay, Rules.FactoryDiplomas, Rules.EquipmentUtilities, Rules.OfficeIt })
             Assert.Contains(own, o => o.Id == rule.Id && o.Value == 1);
+        // Explicit zero also disables an older series preset's saved rent multiplier.
+        Assert.Contains(own, o => o.Id == Rules.RentRebalance.Id && o.Value == 0);
+        Assert.False(Rules.RentRebalance.Default);
+        Assert.False(Rules.EquipmentUtilities.Default);
+        Assert.False(Rules.OfficeIt.Default);
         Assert.True(Rules.SeriesPrefill.Default);
     }
 

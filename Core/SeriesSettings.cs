@@ -60,12 +60,12 @@ namespace HardModePatch.Core
         {
             // Our own rules: the pack's mechanics.
             Hmp("scenario_indebted_start", "series start: $551.37 cash and the $75,454.35 loan"),
-            Hmp("rent_rebalance", "series rule"),
+            new SeriesOption(Self, HmpTitle, "rent_rebalance", OptionKind.Toggle, 0, "Economy Expansion running costs replace the flat rent multiplier"),
             Hmp("happiness_rebalance", "series rule"),
             Hmp("owner_job_full_pay", "series rule"),
             Hmp("factory_diplomas", "series rule"),
-            Hmp("equipment_utilities", "series rule"),
-            Hmp("office_it", "series rule"),
+            Hmp("equipment_utilities", "Economy Expansion running costs on RLO"),
+            Hmp("office_it", "Economy Expansion running costs on RLO"),
 
             new SeriesOption(RivalBalance, RbTitle, "rival_preset", OptionKind.Dropdown, 1, "preset Normal (0 Easy, 1 Normal, 2 Hard)"),
 

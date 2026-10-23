@@ -20,7 +20,7 @@ $RegistryPath = 'HKCU:\Software\Hovgaard Games\Big Ambitions'
 # Core/SeriesSettings.cs; tools/SettingsCheck compares the two.
 $Series = @(
     @{ Owner = 'HardModePatch'; Id = 'scenario_indebted_start'; Value = 1 }
-    @{ Owner = 'HardModePatch'; Id = 'rent_rebalance'; Value = 1 }
+    @{ Owner = 'HardModePatch'; Id = 'rent_rebalance'; Value = 0 }
     @{ Owner = 'HardModePatch'; Id = 'happiness_rebalance'; Value = 1 }
     @{ Owner = 'HardModePatch'; Id = 'owner_job_full_pay'; Value = 1 }
     @{ Owner = 'HardModePatch'; Id = 'factory_diplomas'; Value = 1 }
