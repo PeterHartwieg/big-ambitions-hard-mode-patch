@@ -1,5 +1,7 @@
 # HART. Mod Pack Patch
 
+> Retired into **HART. Mod Pack 1.1.0**. All 0.5.0 features now ship in HARTModPack.dll. Use [the retirement note](workshop/RETIRED-IN-MODPACK-1.1.0.md) and the short Workshop description. The remaining instructions document the historical standalone release.
+
 The HART. Mod Pack's companion mod. Formerly HART. Mode Patch (until 23 October 2026) and before that Hard Mode Patch. The DLL, the mod folder and the option IDs keep the old `HardModePatch` name, so installed settings and saves carry over. The `[HART. Mode Patch]` prefix in `Player.log` also stays.
 
 A Big Ambitions mod for the HART. Group series pack: the series settings in one button, an optional indebted starting scenario, our own balance rules on Real Life Overhaul, and runtime patches that make other Workshop mods fit together. Every change has an option under Settings > Mods. The scenario and our own rules are off by default; with them off and no target mod installed, the only change is the custom game screen opening with the series values, and that has its own switch.

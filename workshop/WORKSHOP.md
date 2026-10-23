@@ -1,5 +1,7 @@
 # HART. Mod Pack Patch: Workshop upload
 
+> Retired into **HART. Mod Pack 1.1.0**. All 0.5.0 features now ship in HARTModPack.dll. Use [the retirement note](RETIRED-IN-MODPACK-1.1.0.md) and the short Workshop description. The remaining instructions document the historical standalone release.
+
 Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). This folder is not part of the package, except `preview.png`. Nothing here has been uploaded. Earlier Mac integration covered series settings, a new game, midnight and save/reload. Current release validation and remaining native checks are recorded in the release session 2 handoff.
 
 ## Fields
