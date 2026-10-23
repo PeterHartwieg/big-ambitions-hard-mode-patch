@@ -1,10 +1,40 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../hart.css"><link rel="stylesheet" href="../theme.css"></head><body><div class="card"><div class="bar mono"><div class="who"><img src="../src/hart-wordmark.svg" alt="HART." style="margin-left:-11px"><span class="dim">/</span><span>Mod Pack Patch</span></div><div class="sec">04 / House rules</div></div>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../hart.css"><link rel="stylesheet" href="../theme.css">
+<style>
+.stage { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr auto; gap: 26px; }
+.rc { grid-column: 1 / -1; padding: 30px 40px; display: flex; flex-direction: column; }
+.rc .head { display: flex; justify-content: space-between; align-items: center; }
+.rc .tag { font-size: 18px; padding: 7px 16px; letter-spacing: 0.1em; }
+.rc .halves { flex: 1; display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; margin-top: 24px; }
+.rc .halves > div + div { border-left: 2px solid var(--rule); padding-left: 40px; }
+.rc h2 { font-weight: 800; font-size: 32px; white-space: nowrap; letter-spacing: -0.01em; }
+.rc p { font-size: 22px; line-height: 1.32; color: var(--soft); }
+.hours { margin: 18px 0 14px; display: grid; grid-template-columns: auto 1fr; gap: 12px 16px; align-items: center; }
+.hours .h { font-family: Plex, monospace; font-size: 21px; color: var(--dim); }
+.hours .b { height: 40px; border-radius: 8px; background: var(--raised); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; font-family: Plex, monospace; font-size: 22px; color: var(--ink); }
+.hours .b.full { background: rgba(67, 192, 122, 0.22); }
+.big { font-weight: 800; font-size: 64px; line-height: 1; margin-top: 18px; white-space: nowrap; }
+.big small { font-family: Plex, monospace; font-weight: 500; font-size: 22px; color: var(--accent); letter-spacing: 0.08em; margin-left: 10px; }
+.sm { padding: 24px 26px; }
+.sm .mono { font-size: 17px; letter-spacing: 0.08em; white-space: nowrap; }
+.sm .n { font-weight: 800; font-size: 42px; line-height: 1.1; margin-top: 6px; }
+.sm p { font-size: 21px; line-height: 1.3; color: var(--soft); margin-top: 8px; }
+</style></head><body><div class="card"><div class="bar mono"><div class="who"><img src="../src/hart-wordmark.svg" alt="HART." style="margin-left:-11px"><span class="dim">/</span><span>Mod Pack Patch</span></div><div class="sec">04 / House rules</div></div>
 <div class="copy"><h1>House rules, when you want them.</h1>
 <p class="lede">All off until you turn them on or press the series button.</p></div>
-<div class="stage" style="display:grid; grid-template-columns:1fr 1fr; gap:28px">
-<div class="panel" style="padding:30px 36px"><div class="mono accent" style="font-size:22px">Indebted start</div><div style="font-weight:800; font-size:50px; margin-top:8px">$551</div><div style="font-size:25px; line-height:1.32; color:var(--soft); margin-top:8px">cash and a $75,454 student loan at a city bank. Your difficulty settings stay as you chose them.</div></div>
-<div class="panel" style="padding:30px 36px"><div class="mono accent" style="font-size:22px">Economy Expansion</div><div style="font-weight:800; font-size:50px; margin-top:8px">Running costs</div><div style="font-size:25px; line-height:1.32; color:var(--soft); margin-top:8px">Equipment and opening hours shape utility bills. Offices need internet and pay $150 per computer each game month. The series button turns the flat rent increase off.</div></div>
-<div class="panel" style="padding:30px 36px"><div class="mono accent" style="font-size:22px">Happiness</div><div style="font-size:25px; line-height:1.32; color:var(--soft); margin-top:14px">Home tops out around 60. Cinema, golf, the beach and other outings carry you for days, so a mix beats a routine.</div></div>
-<div class="panel" style="padding:30px 36px"><div class="mono accent" style="font-size:22px">Real Life Overhaul</div><div style="font-size:25px; line-height:1.32; color:var(--soft); margin-top:14px">Jobs pay in full while you run businesses, utilities follow your appliances and hours, offices need internet, some machines need a trade diploma.</div></div>
+<div class="stage">
+<div class="panel rc">
+ <div class="head"><div class="mono accent" style="font-size:20px; white-space:nowrap">Economy Expansion running costs</div><div class="tag mono" style="white-space:nowrap">Series: no 2× / 3× rent</div></div>
+ <div class="halves">
+  <div><h2>Utilities follow hours</h2>
+   <div class="hours"><span class="h">12 h</span><div class="b" style="width:57.1%">1×</div><span class="h">24 h</span><div class="b full" style="width:100%">1.75×</div></div>
+   <p>of Real Life Overhaul's power and water, plus the draw of the appliances you place.</p></div>
+  <div><h2>Offices need internet</h2>
+   <div class="big">$150<small>/ desk / month</small></div>
+   <p style="margin-top:16px">for each desk with a computer, added to the internet bill.</p></div>
+ </div>
+</div>
+<div class="panel sm"><div class="mono accent">Indebted start</div><div class="n">$551</div><p>cash and a $75,454 student loan. Difficulty stays yours.</p></div>
+<div class="panel sm"><div class="mono accent">Happiness</div><div class="n">~60</div><p>is home's ceiling. Outings carry you for days.</p></div>
+<div class="panel sm"><div class="mono accent">Real Life Overhaul</div><p style="margin-top:14px">Jobs pay in full while you run businesses. Some machines need a trade diploma.</p></div>
 </div>
 <div class="foot mono"><span>HART. Mod Pack Patch / 0.5.0 / Part of the HART. Mod Pack</span><span>04 / 06</span></div></div></body></html>
