@@ -1,3 +1,6 @@
+[h2]⚠ Still being playtested[/h2]
+[b]This patch and the HART. Mod Pack are still being playtested.[/b] The series settings and running costs (utilities, office internet) may be rebalanced in upcoming updates. Feedback is very welcome, so please post bugs and balance impressions in the comments.
+
 The HART. Mod Pack's companion mod. It carries the settings and rules the HART. Group series plays with, and the fixes that let the pack's mods run together. The pack lists it as a required item. It also works on its own: every part that needs another mod waits for that mod to be loaded.
 
 [h2]Series settings[/h2]
