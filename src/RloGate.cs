@@ -69,8 +69,8 @@ namespace HardModePatch
                 }
                 else
                 {
-                    Message = described + " is a version HART. Mode Patch hasn't reviewed. Factory diplomas, running costs, owner job pay"
-                        + " and the hotel 'no home' rule are off until HART. Mode Patch is updated; RLO runs as its author published it."
+                    Message = described + " is a version HART. Mod Pack Patch hasn't reviewed. Factory diplomas, running costs, owner job pay"
+                        + " and the hotel 'no home' rule are off until HART. Mod Pack Patch is updated; RLO runs as its author published it."
                         + " A save's factory diploma records are kept for that update.";
                     Log.Warn(Message);
                 }

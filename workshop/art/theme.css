@@ -1,7 +1,18 @@
-/* HART. Mode Patch: a printed rule sheet. Paper, ink and a red pen. */
-:root { --bg: #F2EDE2; --panel: #FBF8F1; --ink: #161A18; --soft: #4A4F4B; --dim: #8A8C84; --rule: #DCD5C6; --accent: #C8442F; }
-.val { font-family: Plex, monospace; font-size: 28px; color: var(--accent); text-align: right; white-space: nowrap; }
-.tbl { display: grid; grid-template-columns: 1fr auto; column-gap: 40px; row-gap: 0; }
-.tbl > div { padding: 11px 0; border-bottom: 2px dashed var(--rule); font-size: 28px; }
-.button { display: inline-block; background: var(--ink); color: var(--bg); font-weight: 700; border-radius: 14px; }
-.stamp { display: inline-block; border: 4px solid var(--accent); color: var(--accent); border-radius: 10px; transform: rotate(-4deg); }
+/* HART. Mod Pack Patch: the HART. brand sheet itself. Brand black, paper, the green dot, Uncle Fred's city from the Mod Pack preview. */
+:root { --bg: #0D100F; --panel: #151917; --raised: #1C211E; --ink: #E9ECE6; --soft: #B9C0BA; --dim: #9AA39D; --rule: #262C28; --accent: #43C07A; }
+/* Brand-sheet frame: a ruled header and footer, as on HART-Brand-Preview.png. */
+.card .bar { position: absolute; left: 120px; right: 120px; top: 64px; height: 76px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--rule); font-size: 22px; }
+.card .bar .who { display: flex; align-items: center; gap: 22px; color: var(--ink); }
+.card .bar .who img { height: 38px; display: block; }
+.card .bar .sec { color: var(--accent); }
+.card .copy { top: 220px; }
+.card .stage { top: 220px; }
+.city { position: absolute; inset: 0; overflow: hidden; }
+.city img { position: absolute; display: block; }
+.shade { position: absolute; inset: 0; }
+.button { display: inline-flex; align-items: center; gap: 18px; background: var(--raised); color: var(--ink); font-weight: 700; border: 2px solid var(--accent); border-radius: 14px; }
+.button i { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.val { font-family: Plex, monospace; font-size: 28px; color: var(--accent); text-align: right; white-space: nowrap; padding-left: 40px !important; }
+.tbl { display: grid; grid-template-columns: 1fr auto; }
+.tbl > div { padding: 11px 0; border-bottom: 2px solid var(--rule); font-size: 28px; }
+.tag { display: inline-block; border: 2px solid var(--accent); color: var(--accent); border-radius: 999px; }

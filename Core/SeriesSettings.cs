@@ -48,7 +48,7 @@ namespace HardModePatch.Core
     public static class SeriesSettings
     {
         public const string Self = "HardModePatch", Rlo = "RealLifeOverhaul", RivalBalance = "HARTRivalBalance", DynamicRivals = "DynamicRivals";
-        const string HmpTitle = "HART. Mode Patch", RloTitle = "Real Life Overhaul", RbTitle = "HART Rival Balance", DrTitle = "Dynamic Rivals";
+        const string HmpTitle = "HART. Mod Pack Patch", RloTitle = "Real Life Overhaul", RbTitle = "HART. Thriving Rivals", DrTitle = "Dynamic Rivals";
 
         static SeriesOption Hmp(string id, string why) { return new SeriesOption(Self, HmpTitle, id, OptionKind.Toggle, 1, why); }
         static SeriesOption On(string id, string why) { return new SeriesOption(Rlo, RloTitle, id, OptionKind.Toggle, 1, why); }

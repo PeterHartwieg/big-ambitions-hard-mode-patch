@@ -1,18 +1,18 @@
-# HART. Mode Patch
+# HART. Mod Pack Patch
 
-Formerly Hard Mode Patch. The DLL, the mod folder and the option IDs keep the old `HardModePatch` name, so installed settings and saves carry over.
+The HART. Mod Pack's companion mod. Formerly HART. Mode Patch (until 23 October 2026) and before that Hard Mode Patch. The DLL, the mod folder and the option IDs keep the old `HardModePatch` name, so installed settings and saves carry over. The `[HART. Mode Patch]` prefix in `Player.log` also stays.
 
 A Big Ambitions mod for the HART. Group series pack: the series settings in one button, an optional indebted starting scenario, our own balance rules on Real Life Overhaul, and runtime patches that make other Workshop mods fit together. Every change has an option under Settings > Mods. The scenario and our own rules are off by default; with them off and no target mod installed, the only change is the custom game screen opening with the series values, and that has its own switch.
 
 **Status:** 0.5.0, the first Workshop release, paired with City Performance 0.5.0. Checked offline only; nothing in 0.5.0 has run in the game yet. See [CHANGELOG.md](CHANGELOG.md).
 
-HART. Mode Patch owns mod compatibility and the pack's intended mechanics: the series settings, prices, the scenario, rent, happiness, running costs, factory diplomas and the Hyperreal map return. City Performance owns every performance change; Bakery's Help discovery and Hyperreal's lamp search moved there in 0.4.2 ([the handoff](docs/performance-ownership.md)).
+HART. Mod Pack Patch owns mod compatibility and the pack's intended mechanics: the series settings, prices, the scenario, rent, happiness, running costs, factory diplomas and the Hyperreal map return. City Performance owns every performance change; Bakery's Help discovery and Hyperreal's lamp search moved there in 0.4.2 ([the handoff](docs/performance-ownership.md)).
 
 ## HART series settings
 
-Under Settings > Mods > HART. Mode Patch > HART series settings:
+Under Settings > Mods > HART. Mod Pack Patch > HART series settings:
 
-- **Apply HART series settings** (a button) sets the values the series plays with: this mod's rules on, HART Rival Balance on Normal, Dynamic Rivals at 7 wholesale and 8 import rivals, Vanilla occupancy and Balanced events, and Real Life Overhaul with its own camera and Flare off, fewer interruptions and notices, and its core systems on. It finds each option by the mod that registered it and the option's ID, writes it the way the game's Mods page does, and logs every change in `Player.log`. A mod or option it can't find is skipped and listed. It works at the main menu only; restart the game afterwards. It runs only when you press it, and it leaves every option it doesn't list alone.
+- **Apply HART series settings** (a button) sets the values the series plays with: this mod's rules on, HART. Thriving Rivals (formerly HART Rival Balance) on Normal, Dynamic Rivals at 7 wholesale and 8 import rivals, Vanilla occupancy and Balanced events, and Real Life Overhaul with its own camera and Flare off, fewer interruptions and notices, and its core systems on. It finds each option by the mod that registered it and the option's ID, writes it the way the game's Mods page does, and logs every change in `Player.log`. A mod or option it can't find is skipped and listed. It works at the main menu only; restart the game afterwards. It runs only when you press it, and it leaves every option it doesn't list alone.
 - **Prefill the custom game with the series settings** (on) opens New game > Custom with the series values: 60 days a year, $0 starting money, rival attacks 150%, age 18, tax 51%, salaries, public prices and bank interest 130%, customer promotion 50%, urgent fees 200%, export 10%, resale value 50%, every Disable and Unlock box off. Change any of them before you start, or switch the toggle off for the game's own presets.
 
 [The full list of values, their sources and what is left out](docs/series-settings.md). `tools/export-series-settings.ps1` dumps a Windows PC's current values to JSON, to compare a PC with the series profile.

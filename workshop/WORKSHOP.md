@@ -1,4 +1,4 @@
-# HART. Mode Patch: Workshop upload
+# HART. Mod Pack Patch: Workshop upload
 
 Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). This folder is not part of the package, except `preview.jpg` once it exists. Nothing here has been uploaded. Nothing in 0.5.0 has run in the game yet: the release plan's integration run on `agentmac` and Peter's first-day check on a clean Windows profile come before or right after the upload.
 
@@ -6,19 +6,21 @@ Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). 
 
 **Mod folder:** `HardModePatch`. The folder keeps the old name so installed settings and saves carry over. Unzip `build/HardModePatch-0.5.0.zip` into `ModsLocal` on the PC that uploads; the Mod Creator lists the folders in `ModsLocal`.
 
-**Title:** `HART. Mode Patch`
+**Title:** `HART. Mod Pack Patch`
 
-**Short description:** `The HART. Group series settings in one button, plus the balance rules and mod fixes the HART. Mod Pack plays with.`
+Called HART. Mode Patch until 23 October 2026. The name now says what the mod is: the HART. Mod Pack's companion. Only player-facing text changed. The folder, DLL, option IDs and the `[HART. Mode Patch]` prefix in Player.log keep their old names.
+
+**Short description:** `The HART. Mod Pack's companion mod: the HART. Group series settings in one button, plus the house rules and mod fixes the pack plays with.`
 
 **Target build:** `3682`, the game build the hooks were read against (decompile of 22 September 2026; the managed DLLs used for the offline checks are Steam build 25482473).
 
 **Version:** `0.5.0`. Package: `build/HardModePatch/`; archive: `build/HardModePatch-0.5.0.zip`, SHA-256 in `build/HardModePatch-0.5.0.zip.sha256`; file hashes: `build/HardModePatch.sha256`. `tools/package.sh` rebuilds all three.
 
-**Thumbnail:** none yet. The Mod Creator takes the first image in the mod folder's root, so put a `preview.jpg` under 1 MB in `workshop/` and rerun `tools/package.sh`; it copies the file into the package root.
+**Thumbnail:** `workshop/preview.png` (512x512), with six gallery cards in `workshop/cards/`. Sources and `render.sh` are in `workshop/art/`. The Mod Creator takes the first image in the mod folder's root, but `tools/package.sh` still copies `workshop/preview.jpg`, which is the old shared template. Export `preview.png` over `preview.jpg`, or point the script at the PNG, then rerun `tools/package.sh`.
 
 **Required items (set on the Workshop page after upload):** none. Every part that needs another mod switches itself on only when that mod is loaded. HART. Mod Pack lists it as a member.
 
-**Bug reports:** open. There is no HART. Mode Patch Discord channel yet; the description below has a `DISCORD-LINK` placeholder to replace or remove before upload.
+**Bug reports:** open. There is no Discord channel for this mod yet; the description below has a `DISCORD-LINK` placeholder to replace or remove before upload.
 
 **Donations:** the PayPal hosted button `Q8KVURCRBFLQN` covers all of Peter's Big Ambitions projects.
 
@@ -27,12 +29,12 @@ Paste-ready fields for the game's Mod Creator (Main menu > Mods > Mod Creator). 
 **Description** (Steam formatting):
 
 ```
-The settings and rules the HART. Group series plays with, in one mod. It is part of the HART. Mod Pack and also works on its own: every part that needs another mod waits for that mod to be loaded.
+The HART. Mod Pack's companion mod. It carries the settings and rules the HART. Group series plays with, and the fixes that let the pack's mods run together. The pack lists it as a required item. It also works on its own: every part that needs another mod waits for that mod to be loaded.
 
 [h2]Series settings[/h2]
-Under Settings > Mods > HART. Mode Patch:
+Under Settings > Mods > HART. Mod Pack Patch:
 [list]
-[*][b]Apply HART series settings[/b]: works at the main menu. One button sets the series values in this mod, HART Rival Balance (Normal), Dynamic Rivals (7 wholesale and 8 import rivals, Vanilla occupancy, Balanced events) and Real Life Overhaul (its own camera and Flare off, fewer interruptions and notices, its core systems on). Every change goes to Player.log, anything it can't find is skipped and listed, and it asks you to restart. It only runs when you press it and leaves every other option alone.
+[*][b]Apply HART series settings[/b]: works at the main menu. One button sets the series values in this mod, HART. Thriving Rivals (Normal), Dynamic Rivals (7 wholesale and 8 import rivals, Vanilla occupancy, Balanced events) and Real Life Overhaul (its own camera and Flare off, fewer interruptions and notices, its core systems on). Every change goes to Player.log, anything it can't find is skipped and listed, and it asks you to restart. It only runs when you press it and leaves every other option alone.
 [*][b]Prefill the custom game with the series settings[/b] (on): New game > Custom opens with the series values. 60 days a year, $0 starting money, rival attacks 150%, age 18, tax 51%, salaries, public prices and bank interest 130%, customer promotion 50%, urgent fees 200%, export 10%, resale value 50%, every Disable and Unlock box off. Change anything before you start, or switch it off.
 [/list]
 
@@ -65,11 +67,11 @@ Other mods update on their own schedule. If one changes the code a fix relies on
 [*]This is the first release. It has been checked against the game's and the other mods' code, but not yet played. Report anything odd.
 [*]Performance changes live in City Performance, not here.
 [*]Back up a save you care about before loading it with new mods.
-[*]Lines starting [HART. Mode Patch] in Player.log (%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions) show what the mod did and why.
+[*]Lines starting [HART. Mode Patch] (the old name) in Player.log (%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions) show what the mod did and why.
 [/list]
 
 [h2]Bug reports[/h2]
-Post bugs in [url=DISCORD-LINK]#hart-mode-patch-bugs on my Discord[/url], one post per problem. Include the mod version, your other mods and what happened, plus the [HART. Mode Patch] lines from Player.log.
+Post bugs in [url=DISCORD-LINK]my Discord[/url], one post per problem. Include the mod version, your other mods and what happened, plus the [HART. Mode Patch] lines from Player.log.
 
 [h2]Support[/h2]
 The mod is free and stays free. If you'd like to say thanks, you can [url=https://www.paypal.com/donate/?hosted_button_id=Q8KVURCRBFLQN]support my Big Ambitions projects via PayPal[/url].
@@ -82,7 +84,7 @@ Made for the HART. Group series. The full README ships with the mod.
 ```
 0.5.0: first Workshop release
 
-- New: Apply HART series settings, one button for the series values in this mod, HART Rival Balance, Dynamic Rivals and Real Life Overhaul.
+- New: Apply HART series settings, one button for the series values in this mod, HART. Thriving Rivals, Dynamic Rivals and Real Life Overhaul.
 - New: the custom game screen opens with the series values (switch under Settings > Mods).
 - Real Life Overhaul 0.49.0 supported. On an RLO version this mod hasn't been checked against, its RLO features pause and your diploma progress is kept.
 - Performance changes moved to City Performance 0.5.0.

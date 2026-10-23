@@ -22,15 +22,15 @@ namespace HardModePatch.Core
         // Null when the loan product is allowed, otherwise the reason shown to the player.
         public static string CheckLoan(decimal apr, decimal feeRate, int termMonths)
         {
-            if (apr > MaxLoanApr) return "HART. Mode Patch caps loan APR at " + Percent(MaxLoanApr) + ".";
-            if (feeRate > MaxLoanFee) return "HART. Mode Patch caps the origination fee at " + Percent(MaxLoanFee) + ".";
-            if (termMonths < MinLoanTermMonths) return "HART. Mode Patch requires a loan term of at least " + MinLoanTermMonths + " months.";
+            if (apr > MaxLoanApr) return "HART. Mod Pack Patch caps loan APR at " + Percent(MaxLoanApr) + ".";
+            if (feeRate > MaxLoanFee) return "HART. Mod Pack Patch caps the origination fee at " + Percent(MaxLoanFee) + ".";
+            if (termMonths < MinLoanTermMonths) return "HART. Mod Pack Patch requires a loan term of at least " + MinLoanTermMonths + " months.";
             return null;
         }
 
         public static string CheckCard(decimal apr)
         {
-            return apr > MaxCardApr ? "HART. Mode Patch caps card APR at " + Percent(MaxCardApr) + "." : null;
+            return apr > MaxCardApr ? "HART. Mod Pack Patch caps card APR at " + Percent(MaxCardApr) + "." : null;
         }
 
         public static decimal ClampRate(bool isLoan, bool isCard, decimal rate)
